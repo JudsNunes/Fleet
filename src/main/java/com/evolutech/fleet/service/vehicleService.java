@@ -8,6 +8,7 @@ public interface vehicleService {
 
     Vehicle saveByEntity(Vehicle vehicle);
 
+
     Vehicle findByIdAndReturnEntity(Long id);
 
     List<Vehicle> findAllAndReturnListOfEntity(Vehicle vehicle);
