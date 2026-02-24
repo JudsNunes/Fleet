@@ -1,14 +1,11 @@
 package com.evolutech.fleet.API.vehicleAPI;
 
 
-import org.springframework.web.bind.annotation.RequestMapping;
+import com.evolutech.fleet.api.ApiApi;
 import org.springframework.web.bind.annotation.RestController;
 
-
 @RestController
-@RequestMapping("/vehicle")
-public class vehicleController {
-
+public class VehicleController implements ApiApi {
 
 
 }

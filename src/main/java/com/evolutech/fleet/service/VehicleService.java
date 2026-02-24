@@ -4,18 +4,17 @@ import com.evolutech.fleet.entity.Vehicle;
 
 import java.util.List;
 
-public interface vehicleService {
+public interface VehicleService {
 
     Vehicle saveByEntity(Vehicle vehicle);
 
-
     Vehicle findByIdAndReturnEntity(Long id);
 
-    List<Vehicle> findAllAndReturnListOfEntity(Vehicle vehicle);
+    List<Vehicle> findAllAndReturnListOfEntity();
 
     Vehicle updateByEntity(Vehicle vehicle);
 
-    Vehicle deleteByEntity(Vehicle vehicle);
+    Void deleteByEntity(Vehicle vehicle);
 
     List<Vehicle> findByIdAndPlate(Long id, String plate);
 

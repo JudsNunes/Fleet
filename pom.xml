@@ -30,13 +30,24 @@
 		<java.version>21</java.version>
 	</properties>
 	<dependencies>
+		<!-- Swagger/OpenAPI -->
+		<dependency>
+			<groupId>org.springdoc</groupId>
+			<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+			<version>2.0.4</version>
+		</dependency>
+		<dependency>
+			<groupId>org.openapitools</groupId>
+			<artifactId>jackson-databind-nullable</artifactId>
+			<version>0.2.6</version>
+		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-jpa</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-webmvc</artifactId>
+			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -63,6 +74,52 @@
 
 	<build>
 		<plugins>
+		<!-- Build Helper Plugin -->
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>build-helper-maven-plugin</artifactId>
+				<version>3.3.0</version>
+				<executions>
+					<execution>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>add-source</goal>
+						</goals>
+						<configuration>
+							<sources>
+								<source>${project.build.directory}/generated-sources/openapi/src/main/java</source>
+							</sources>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		<!-- Plugin OpenAPI Generator -->
+			<plugin>
+			<groupId>org.openapitools</groupId>
+			<artifactId>openapi-generator-maven-plugin</artifactId>
+			<version>6.4.0</version>
+			<executions>
+				<execution>
+					<goals>
+						<goal>generate</goal>
+					</goals>
+					<configuration>
+						<inputSpec>${project.basedir}/src/main/resources/api/evolutech-fleet.yaml</inputSpec>
+						<generatorName>spring</generatorName>
+						<apiPackage>com.evolutech.fleet.api</apiPackage>
+						<modelPackage>com.evolutech.fleet.api.model</modelPackage>
+						<supportingFilesToGenerate>ApiUtil.java</supportingFilesToGenerate>
+						<configOptions>
+							<delegatePattern>true</delegatePattern>
+							<interfaceOnly>true</interfaceOnly>
+							<useBeanValidation>true</useBeanValidation>
+							<useSpringBoot3>true</useSpringBoot3>
+							<apiNameSuffix>Api</apiNameSuffix>
+						</configOptions>
+					</configuration>
+				</execution>
+			</executions>
+			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
