@@ -1,248 +1,254 @@
-openapi: 3.0.0
+swagger: "2.0"
 info:
-  title: Evolutech Fleet Management API
-  description: API para gerenciamento de frotas de veículos
-  version: 1.0.0
+  description: "API para gerenciamento de frotas de veículos"
+  version: "1.0.0"
+  title: "Evolutech Fleet Management API"
+  termsOfService: "http://swagger.io/terms/"
   contact:
-    name: Evolutech
-    email: support@evolutech.com
+    email: "apiteam@swagger.io"
+  license:
+    name: "Apache 2.0"
+    url: "http://www.apache.org/licenses/LICENSE-2.0.html"
+host: "evolutech.fleet.swagger.io"
+basePath: "/api/v1"
 
-servers:
-  - url: http://localhost:8080
-    description: Desenvolvimento
-  - url: https://api.evolutech.com
-    description: Produção
-
-tags:
-  - name: VehicleAPI
-    description: Operações com veículos
+schemes:
+  - "https"
+  - "http"
 
 paths:
-  /api/v1/vehicles:
+  /vehicles:
     get:
-      operationId: getAllVehicles
       tags:
-        - VehicleAPI
-      summary: Listar todos os veículos
+        - "VehicleAPI"
+      summary: "Listar todos os veículos"
+      description: "Lista de veículos retornada com sucesso"
+      operationId: "getAllVehicles"
+      produces:
+        - "application/json"
       responses:
-        '200':
-          description: Lista de veículos retornada com sucesso
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Vehicle'
-        '500':
-          description: Erro interno do servidor
+        200:
+          description: "Lista de veículos retornada com sucesso"
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Vehicle'
+        500:
+          description: "Erro interno do servidor"
 
     post:
       operationId: createVehicle
       tags:
         - VehicleAPI
-      summary: Criar um novo veículo
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/VehicleRequest'
+      summary: "Criar um novo veículo"
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - in: body
+          name: body
+          description: "Dados do veículo a ser criado"
+          required: true
+          schema:
+            $ref: '#/definitions/VehicleRequest'
       responses:
-        '201':
-          description: Veículo criado com sucesso
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Vehicle'
-        '400':
-          description: Dados inválidos
-        '409':
-          description: Veículo já existe
-        '500':
-          description: Erro interno do servidor
+        201:
+          description: "Veículo criado com sucesso"
+          schema:
+            $ref: '#/definitions/Vehicle'
+        400:
+          description: "Dados inválidos"
+        409:
+          description: "Veículo já existe"
+        500:
+          description: "Erro interno do servidor"
 
-  /api/v1/vehicles/{id}:
+  /vehicles/{id}:
     get:
       operationId: getVehicleById
       tags:
         - VehicleAPI
-      summary: Buscar veículo por ID
+      summary: "Buscar veículo por ID"
+      produces:
+        - "application/json"
       parameters:
         - name: id
           in: path
+          description: "ID do veículo"
           required: true
-          schema:
-            type: integer
-            format: int64
+          type: integer
+          format: int64
       responses:
-        '200':
-          description: Veículo encontrado
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Vehicle'
-        '404':
-          description: Veículo não encontrado
-        '500':
-          description: Erro interno do servidor
+        200:
+          description: "Veículo encontrado"
+          schema:
+            $ref: '#/definitions/Vehicle'
+        404:
+          description: "Veículo não encontrado"
+        500:
+          description: "Erro interno do servidor"
 
     put:
       operationId: updateVehicle
       tags:
         - VehicleAPI
-      summary: Atualizar um veículo
+      summary: "Atualizar um veículo"
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
       parameters:
         - name: id
           in: path
+          description: "ID do veículo"
+          required: true
+          type: integer
+          format: int64
+        - in: body
+          name: body
+          description: "Dados do veículo a ser atualizado"
           required: true
           schema:
-            type: integer
-            format: int64
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/VehicleRequest'
+            $ref: '#/definitions/VehicleRequest'
       responses:
-        '200':
-          description: Veículo atualizado com sucesso
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Vehicle'
-        '404':
-          description: Veículo não encontrado
-        '400':
-          description: Dados inválidos
-        '500':
-          description: Erro interno do servidor
+        200:
+          description: "Veículo atualizado com sucesso"
+          schema:
+            $ref: '#/definitions/Vehicle'
+        404:
+          description: "Veículo não encontrado"
+        400:
+          description: "Dados inválidos"
+        500:
+          description: "Erro interno do servidor"
 
     delete:
       operationId: deleteVehicle
       tags:
         - VehicleAPI
-      summary: Deletar um veículo
+      summary: "Deletar um veículo"
+      produces:
+        - "application/json"
       parameters:
         - name: id
           in: path
+          description: "ID do veículo"
           required: true
-          schema:
-            type: integer
-            format: int64
+          type: integer
+          format: int64
       responses:
-        '204':
-          description: Veículo deletado com sucesso
-        '404':
-          description: Veículo não encontrado
-        '500':
-          description: Erro interno do servidor
+        204:
+          description: "Veículo deletado com sucesso"
+        404:
+          description: "Veículo não encontrado"
+        500:
+          description: "Erro interno do servidor"
 
-  /api/v1/vehicles/search:
+  /vehicles/search:
     get:
       operationId: findByIdAndPlate
       tags:
         - VehicleAPI
-      summary: Buscar veículo por ID e placa
+      summary: "Buscar veículo por ID e placa"
+      produces:
+        - "application/json"
       parameters:
         - name: id
           in: query
+          description: "ID do veículo"
           required: true
-          schema:
-            type: integer
-            format: int64
-        - name: plate
-          in: query
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: Veículo encontrado
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Vehicle'
-        '404':
-          description: Veículo não encontrado
-        '500':
-          description: Erro interno do servidor
-
-components:
-  schemas:
-    Vehicle:
-      type: object
-      required:
-        - id
-        - plate
-        - brand
-        - model
-        - year
-      properties:
-        id:
           type: integer
           format: int64
-          description: ID único do veículo
-        plate:
+        - name: plate
+          in: query
+          description: "Placa do veículo"
+          required: true
           type: string
-          description: Placa do veículo
-          example: ABC-1234
-        brand:
-          type: string
-          description: Marca do veículo
-          example: Toyota
-        model:
-          type: string
-          description: Modelo do veículo
-          example: Corolla
-        year:
-          type: integer
-          format: int32
-          description: Ano de fabricação
-          example: 2023
-        color:
-          type: string
-          description: Cor do veículo
-          example: Preto
-        mileage:
-          type: number
-          format: double
-          description: Quilometragem
-          example: 5000.0
+      responses:
+        200:
+          description: "Veículo encontrado"
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Vehicle'
+        404:
+          description: "Veículo não encontrado"
+        500:
+          description: "Erro interno do servidor"
 
-    VehicleRequest:
-      type: object
-      required:
-        - plate
-        - brand
-        - model
-        - year
-      properties:
-        plate:
-          type: string
-          description: Placa do veículo
-          example: ABC-1234
-        brand:
-          type: string
-          description: Marca do veículo
-          example: Toyota
-        model:
-          type: string
-          description: Modelo do veículo
-          example: Corolla
-        year:
-          type: integer
-          format: int32
-          description: Ano de fabricação
-          example: 2023
-        color:
-          type: string
-          description: Cor do veículo
-          example: Preto
-        mileage:
-          type: number
-          format: double
-          description: Quilometragem
-          example: 5000.0
+definitions:
+  Vehicle:
+    type: object
+    required:
+      - id
+      - plate
+      - brand
+      - model
+      - year
+    properties:
+      id:
+        type: integer
+        format: int64
+        description: "ID único do veículo"
+      plate:
+        type: string
+        description: "Placa do veículo"
+        example: "ABC-1234"
+      brand:
+        type: string
+        description: "Marca do veículo"
+        example: "Toyota"
+      model:
+        type: string
+        description: "Modelo do veículo"
+        example: "Corolla"
+      year:
+        type: integer
+        format: int32
+        description: "Ano de fabricação"
+        example: 2023
+      color:
+        type: string
+        description: "Cor do veículo"
+        example: "Preto"
+      mileage:
+        type: "number"
+        format: "double"
+        description: "Quilometragem"
+        example: 5000.0
+
+  VehicleRequest:
+    type: object
+    required:
+      - plate
+      - brand
+      - model
+      - year
+    properties:
+      plate:
+        type: string
+        description: "Placa do veículo"
+        example: "ABC-1234"
+      brand:
+        type: string
+        description: "Marca do veículo"
+        example: "Toyota"
+      model:
+        type: string
+        description: "Modelo do veículo"
+        example: "Corolla"
+      year:
+        type: integer
+        format: int32
+        description: "Ano de fabricação"
+        example: 2023
+      color:
+        type: string
+        description: "Cor do veículo"
+        example: "Preto"
+      mileage:
+        type: number
+        format: double
+        description: "Quilometragem"
+        example: 5000.0
