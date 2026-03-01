@@ -1,13 +1,23 @@
 package com.evolutech.fleet.mapper;
 
-import com.evolutech.fleet.api.model.VehicleDTO;
+import com.evolutech.fleet.api.model.VehicleRequestDTO;
+import com.evolutech.fleet.api.model.VehicleResponseDTO;
 import com.evolutech.fleet.model.entity.Vehicle;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+
+import java.util.List;
 
 @Mapper(componentModel = "spring")
 public interface VehicleMapper {
 
-    VehicleDTO vehicleToVehicleDTO(Vehicle vehicle);
+    Vehicle toEntity(VehicleRequestDTO request);
 
-    Vehicle toDTO(VehicleDTO vehicleDTO);
+    @Mapping(source = "id", target = "id")
+    @Mapping(source = "createdAt", target = "createdAt")
+    @Mapping(source = "updatedAt", target = "updatedAt")
+    VehicleResponseDTO toResponseDTO(Vehicle vehicle);
+
+    List<VehicleResponseDTO> toResponseDTOList(List<Vehicle> vehicles);
 }
+
