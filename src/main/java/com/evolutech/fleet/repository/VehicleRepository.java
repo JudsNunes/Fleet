@@ -1,6 +1,6 @@
 package com.evolutech.fleet.repository;
 
-import com.evolutech.fleet.entity.Vehicle;
+import com.evolutech.fleet.model.entity.Vehicle;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
