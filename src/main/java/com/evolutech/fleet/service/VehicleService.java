@@ -1,22 +1,23 @@
 package com.evolutech.fleet.service;
 
-import com.evolutech.fleet.api.model.VehicleDTO;
 import com.evolutech.fleet.api.model.VehicleRequestDTO;
+import com.evolutech.fleet.api.model.VehicleResponseDTO;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface VehicleService {
 
-    VehicleDTO saveByEntity(VehicleRequestDTO vehicleRequestDTO);
+    VehicleResponseDTO save(VehicleRequestDTO request);
 
-    VehicleDTO findByIdAndReturnEntity(Long id);
+    Optional<VehicleResponseDTO> findById(Long id);
 
-    List<VehicleDTO> findAllAndReturnListOfEntity();
+    List<VehicleResponseDTO> findAll();
 
-    VehicleDTO updateByEntity(VehicleRequestDTO vehicleRequestDTO);
+    VehicleResponseDTO update(VehicleRequestDTO request);
 
-    Void deleteByEntity(VehicleRequestDTO vehicleRequestDTO);
+    void delete(Long id);
 
-    List<VehicleDTO> findByIdAndPlate(Long id, String plate);
-
+    Optional<VehicleResponseDTO> findByPlate(VehicleRequestDTO request);
 }
+

@@ -3,7 +3,7 @@ package com.evolutech.fleet.model.entity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.PositiveOrZero;
+import jakarta.validation.constraints.Positive;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -13,39 +13,36 @@ import java.time.LocalDate;
 
 @Entity
 @EntityListeners(AuditingEntityListener.class)
-@Table(name = "TBG_TRAVEL")
+@Table(name = "TBG_MANUTENTION")
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-public class Travel {
+public class Manutention {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @EqualsAndHashCode.Include
-    private Long id;
-    @NotBlank
-    private String origin;
-    @NotBlank
-    private String destination;
-    @PositiveOrZero
-    private Double fuelConsumed;
-    @PositiveOrZero
-    private Double distanceTraveled;
-    @PositiveOrZero
-    private Double mileage;
+    private String id;
     @NotNull
-    private LocalDate travelDate;
+    private LocalDate manutentionDate;
+    @NotBlank
+    private String description;
+    @NotBlank
+    private String type;
+    @Positive
+    private Double cost;
+    @Positive
+    private Double mileage;
+    @Positive
+    private Double nextMileage;
+    private boolean done;
     @ManyToOne
     @JoinColumn(name = "vehicle_id", nullable = false)
     private Vehicle vehicle;
-    @ManyToOne
-    @JoinColumn(name = "driver_id", nullable = false)
-    private Driver driver;
     @CreatedDate
     private LocalDate createdAt;
     @LastModifiedDate
     private LocalDate updatedAt;
-
 }
