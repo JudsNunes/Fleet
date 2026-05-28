@@ -8,7 +8,7 @@ import com.evolutech.core.fleet.repository.VehicleRepository;
 import org.springframework.stereotype.Component;
 
 @Component
-public class ManutentionMapper {
+public class ManutentionMapper  {
 
     private final VehicleRepository vehicleRepository;
 
