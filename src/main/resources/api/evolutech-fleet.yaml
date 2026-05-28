@@ -1,0 +1,579 @@
+openapi: 3.0.0
+info:
+  title: Evolutech Fleet Management API
+  description: API para gerenciamento de frotas de veículos
+  version: 1.0.0
+  termsOfService: http://swagger.io/terms/
+  contact:
+    email: apiteam@swagger.io
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+
+servers:
+  - url: https://evolutech.fleet.swagger.io/api/v1
+    description: Produção
+  - url: http://evolutech.fleet.swagger.io/api/v1
+    description: Desenvolvimento
+
+tags:
+  - name: VehicleAPI
+    description: Operações com veículos
+    x-class-name: VehicleApi
+
+paths:
+  /vehicles:
+    get:
+      tags:
+        - VehicleAPI
+      summary: Listar todos os veículos
+      operationId: getAllVehicles
+      responses:
+        '200':
+          description: Lista de veículos retornada com sucesso
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Vehicle'
+        '500':
+          description: Erro interno do servidor
+    post:
+      tags:
+        - VehicleAPI
+      summary: Criar um novo veículo
+      operationId: createVehicle
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VehicleRequest'
+      responses:
+        '201':
+          description: Veículo criado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Vehicle'
+        '400':
+          description: Dados inválidos
+        '409':
+          description: Veículo já existe
+        '500':
+          description: Erro interno do servidor
+
+  /vehicles/{id}:
+    get:
+      tags:
+        - VehicleAPI
+      summary: Buscar veículo por ID
+      operationId: getVehicleById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Veículo encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Vehicle'
+        '404':
+          description: Veículo não encontrado
+        '500':
+          description: Erro interno do servidor
+    put:
+      tags:
+        - VehicleAPI
+      summary: Atualizar um veículo
+      operationId: updateVehicle
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VehicleRequest'
+      responses:
+        '200':
+          description: Veículo atualizado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Vehicle'
+        '404':
+          description: Veículo não encontrado
+        '400':
+          description: Dados inválidos
+        '500':
+          description: Erro interno do servidor
+    delete:
+      tags:
+        - VehicleAPI
+      summary: Deletar um veículo
+      operationId: deleteVehicle
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '204':
+          description: Veículo deletado com sucesso
+        '404':
+          description: Veículo não encontrado
+        '500':
+          description: Erro interno do servidor
+
+  /vehicles/search:
+    get:
+      tags:
+        - VehicleAPI
+      summary: Buscar veículo por ID e placa
+      operationId: findByIdAndPlate
+      parameters:
+        - name: id
+          in: query
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: plate
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Veículo encontrado
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Vehicle'
+        '404':
+          description: Veículo não encontrado
+        '500':
+          description: Erro interno do servidor
+
+  /maintenances:
+    get:
+      tags:
+        - MaintenanceAPI
+      summary: Listar todas as manutenções
+      operationId: getAllMaintenances
+      responses:
+        '200':
+          description: Lista de manutenções retornada com sucesso
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Maintenance'
+        '500':
+          description: Erro interno do servidor
+    post:
+      tags:
+        - MaintenanceAPI
+      summary: Criar uma nova manutenção
+      operationId: createMaintenance
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MaintenanceRequest'
+      responses:
+        '201':
+          description: Manutenção criada com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Maintenance'
+        '400':
+          description: Dados inválidos
+        '409':
+          description: Manutenção já existe
+        '500':
+          description: Erro interno do servidor
+
+  /maintenances/{id}:
+    get:
+      tags:
+        - MaintenanceAPI
+      summary: Buscar manutenção por ID
+      operationId: getMaintenanceById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Manutenção encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Maintenance'
+        '404':
+          description: Manutenção não encontrada
+        '500':
+          description: Erro interno do servidor
+    put:
+      tags:
+        - MaintenanceAPI
+      summary: Atualizar uma manutenção
+      operationId: updateMaintenance
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MaintenanceRequest'
+      responses:
+        '200':
+          description: Manutenção atualizada com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Maintenance'
+        '400':
+          description: Dados inválidos
+        '404':
+          description: Manutenção não encontrada
+        '500':
+          description: Erro interno do servidor
+    delete:
+      tags:
+        - MaintenanceAPI
+      summary: Deletar uma manutenção
+      operationId: deleteMaintenance
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '204':
+          description: Manutenção deletada com sucesso
+        '404':
+          description: Manutenção não encontrada
+        '500':
+          description: Erro interno do servidor
+
+  /maintenances/vehicle/{vehicleId}:
+    get:
+      tags:
+        - MaintenanceAPI
+      summary: Listar manutenções por veículo
+      operationId: getMaintenancesByVehicleId
+      parameters:
+        - name: vehicleId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Manutenções encontradas
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Maintenance'
+        '404':
+          description: Nenhuma manutenção encontrada
+        '500':
+          description: Erro interno do servidor
+
+  /maintenances/vehicle/{vehicleId}/done:
+    get:
+      tags:
+        - MaintenanceAPI
+      summary: Listar manutenções por veículo e status
+      operationId: getMaintenancesByVehicleIdAndDone
+      parameters:
+        - name: vehicleId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: done
+          in: query
+          required: true
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Manutenções encontradas
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Maintenance'
+        '404':
+          description: Nenhuma manutenção encontrada
+        '500':
+          description: Erro interno do servidor
+
+  /maintenances/done:
+    get:
+      tags:
+        - MaintenanceAPI
+      summary: Listar manutenções por status
+      operationId: getMaintenancesByDone
+      parameters:
+        - name: done
+          in: query
+          required: true
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Manutenções encontradas
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Maintenance'
+        '404':
+          description: Nenhuma manutenção encontrada
+        '500':
+          description: Erro interno do servidor
+
+
+components:
+  schemas:
+    Vehicle:
+      type: object
+      required:
+        - id
+        - plate
+        - model
+        - brand
+        - year
+        - color
+        - mileage
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: ID único do veículo
+        plate:
+          type: string
+          description: Placa do veículo
+          example: ABC-1234
+        model:
+          type: string
+          description: Modelo do veículo
+          example: Corolla
+        brand:
+            type: string
+            description: Marca do veículo
+            example: Toyota
+        year:
+          type: integer
+          format: int32
+          description: Ano de fabricação
+          example: 2023
+        color:
+          type: string
+          description: Cor do veículo
+          example: Preto
+        mileage:
+          type: number
+          format: double
+          description: Quilometragem
+          example: 5000.0
+
+    VehicleRequest:
+      type: object
+      required:
+        - plate
+        - model
+        - brand
+        - year
+        - color
+        - mileage
+      properties:
+        plate:
+          type: string
+          description: Placa do veículo
+          example: ABC-1234
+        model:
+            type: string
+            description: Modelo do veículo
+            example: Corolla
+        brand:
+          type: string
+          description: Marca do veículo
+          example: Toyota
+        year:
+          type: integer
+          format: int32
+          description: Ano de fabricação
+          example: 2023
+        color:
+          type: string
+          description: Cor do veículo
+          example: Preto
+        mileage:
+          type: number
+          format: double
+          description: Quilometragem
+          example: 5000.0
+
+    VehicleResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: Identificador único do veículo
+          example: 101
+        plate:
+          type: string
+          description: Placa do veículo
+          example: ABC-1234
+        model:
+          type: string
+          description: Modelo do veículo
+          example: Corolla
+        brand:
+          type: string
+          description: Marca do veículo
+          example: Toyota
+        year:
+          type: integer
+          format: int32
+          description: Ano de fabricação
+          example: 2023
+        color:
+          type: string
+          description: Cor do veículo
+          example: Preto
+        mileage:
+          type: number
+          format: double
+          description: Quilometragem
+          example: 5000.0
+        createdAt:
+          type: string
+          format: date-time
+          description: Data de criação do registro
+          example: 2023-01-15T10:00:00Z
+        updatedAt:
+          type: string
+          format: date-time
+          description: Data da última atualização
+          example: 2023-02-01T14:30:00Z
+
+    Maintenance:
+      type: object
+      required:
+        - id
+        - vehicleId
+        - description
+        - cost
+        - done
+        - maintenanceDate
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: ID único da manutenção
+        vehicleId:
+          type: integer
+          format: int64
+          description: ID do veículo
+        description:
+          type: string
+          description: Descrição da manutenção
+          example: Troca de óleo
+        cost:
+          type: number
+          format: double
+          description: Custo da manutenção
+          example: 150.00
+        done:
+          type: boolean
+          description: Status da manutenção
+          example: false
+        maintenanceDate:
+          type: string
+          format: date
+          description: Data da manutenção
+          example: 2024-01-15
+        createdAt:
+          type: string
+          format: date-time
+          description: Data de criação
+          example: 2024-01-15T10:00:00Z
+        updatedAt:
+          type: string
+          format: date-time
+          description: Data da última atualização
+          example: 2024-01-20T14:30:00Z
+    MaintenanceRequest:
+      type: object
+      required:
+        - vehicleId
+        - description
+        - cost
+        - done
+        - maintenanceDate
+      properties:
+        vehicleId:
+          type: integer
+          format: int64
+          description: ID do veículo
+        description:
+          type: string
+          description: Descrição da manutenção
+          example: Troca de óleo
+        cost:
+          type: number
+          format: double
+          description: Custo da manutenção
+          example: 150.00
+        done:
+          type: boolean
+          description: Status da manutenção
+          example: false
+        maintenanceDate:
+          type: string
+          format: date
+          description: Data da manutenção
+          example: 2024-01-15
