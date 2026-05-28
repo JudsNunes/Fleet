@@ -22,7 +22,6 @@ public class Vehicle {
     private Long id;
     @Column(unique = true, nullable = false)
     @NotBlank
-    @Pattern(regexp = "[A-Z]{3}-\\d{4}", message = "Placa deve estar no formato ABC-1234")
     private String plate;
     @NotBlank
     private String model;
