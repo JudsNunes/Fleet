@@ -1,4 +1,4 @@
-package com.evolutech.fleet.exception;
+package com.evolutech.core.fleet.exception;
 
 public class BusinessException extends RuntimeException {
     public BusinessException(String message) {

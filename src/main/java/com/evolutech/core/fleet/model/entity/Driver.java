@@ -1,4 +1,4 @@
-package com.evolutech.fleet.model.entity;
+package com.evolutech.core.fleet.model.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;

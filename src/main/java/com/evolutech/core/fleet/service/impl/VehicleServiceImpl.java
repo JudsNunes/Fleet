@@ -1,11 +1,11 @@
-package com.evolutech.fleet.service.impl;
+package com.evolutech.core.fleet.service.impl;
 
-import com.evolutech.fleet.api.model.VehicleRequestDTO;
-import com.evolutech.fleet.api.model.VehicleResponseDTO;
-import com.evolutech.fleet.exception.BusinessException;
-import com.evolutech.fleet.mapper.VehicleMapper;
-import com.evolutech.fleet.repository.VehicleRepository;
-import com.evolutech.fleet.service.VehicleService;
+import com.evolutech.core.fleet.api.model.VehicleRequestDTO;
+import com.evolutech.core.fleet.api.model.VehicleResponseDTO;
+import com.evolutech.core.fleet.exception.BusinessException;
+import com.evolutech.core.fleet.mapper.VehicleMapper;
+import com.evolutech.core.fleet.repository.VehicleRepository;
+import com.evolutech.core.fleet.service.VehicleService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

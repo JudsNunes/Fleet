@@ -1,7 +1,7 @@
-package com.evolutech.fleet.service;
+package com.evolutech.core.fleet.service;
 
-import com.evolutech.fleet.api.model.VehicleRequestDTO;
-import com.evolutech.fleet.api.model.VehicleResponseDTO;
+import com.evolutech.core.fleet.api.model.VehicleRequestDTO;
+import com.evolutech.core.fleet.api.model.VehicleResponseDTO;
 
 import java.util.List;
 import java.util.Optional;

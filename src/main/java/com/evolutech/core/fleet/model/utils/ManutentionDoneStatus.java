@@ -1,4 +1,4 @@
-package com.evolutech.fleet.model.utils;
+package com.evolutech.core.fleet.model.utils;
 
 public enum ManutentionDoneStatus {
     COMPLETED,
