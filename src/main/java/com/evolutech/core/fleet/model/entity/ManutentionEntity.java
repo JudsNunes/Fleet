@@ -19,7 +19,7 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @NoArgsConstructor
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-public class Manutention {
+public class ManutentionEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -40,7 +40,7 @@ public class Manutention {
     private boolean done;
     @ManyToOne
     @JoinColumn(name = "vehicle_id", nullable = false)
-    private Vehicle vehicle;
+    private VehicleEntity vehicleEntity;
     @CreatedDate
     private LocalDate createdAt;
     @LastModifiedDate

@@ -4,7 +4,7 @@ import com.evolutech.core.fleet.model.dto.request.ManutentionRequestDTO;
 import com.evolutech.core.fleet.model.dto.response.ManutentionResponseDTO;
 import com.evolutech.core.fleet.exception.BusinessException;
 import com.evolutech.core.fleet.mapper.ManutentionMapper;
-import com.evolutech.core.fleet.model.entity.Manutention;
+import com.evolutech.core.fleet.model.entity.ManutentionEntity;
 import com.evolutech.core.fleet.repository.ManutentionRepository;
 import com.evolutech.core.fleet.service.ManutentionService;
 import lombok.extern.slf4j.Slf4j;
@@ -33,8 +33,8 @@ public class ManutentionServiceImpl implements ManutentionService {
         log.info("Creating new maintenance record with description: {}", request.getDescription());
 
         try {
-            Manutention entity = manutentionMapper.toEntity(request);
-            Manutention savedEntity = manutentionRepository.save(entity);
+            ManutentionEntity entity = manutentionMapper.toEntity(request);
+            ManutentionEntity savedEntity = manutentionRepository.save(entity);
             log.info("Maintenance record created successfully with ID: {}", savedEntity.getId());
             return manutentionMapper.toDto(savedEntity);
         } catch (IllegalArgumentException e) {
@@ -67,7 +67,7 @@ public class ManutentionServiceImpl implements ManutentionService {
         log.debug("Finding maintenance records for vehicle ID: {}", vehicleId);
         return manutentionRepository.findAll()
                 .stream()
-                .filter(m -> m.getVehicle().getId().equals(vehicleId))
+                .filter(m -> m.getVehicleEntity().getId().equals(vehicleId))
                 .map(manutentionMapper::toDto)
                 .collect(Collectors.toList());
     }
@@ -76,15 +76,15 @@ public class ManutentionServiceImpl implements ManutentionService {
     public ManutentionResponseDTO update(String id, ManutentionRequestDTO request) {
         log.info("Updating maintenance record with ID: {}", id);
 
-        Manutention entity = manutentionRepository.findById(id)
+        ManutentionEntity entity = manutentionRepository.findById(id)
                 .orElseThrow(() -> {
                     log.error("Maintenance record not found with ID: {}", id);
                     return new BusinessException("Maintenance record not found with ID: " + id);
                 });
 
         try {
-            Manutention updatedEntity = manutentionMapper.updateEntity(request, entity);
-            Manutention savedEntity = manutentionRepository.save(updatedEntity);
+            ManutentionEntity updatedEntity = manutentionMapper.updateEntity(request, entity);
+            ManutentionEntity savedEntity = manutentionRepository.save(updatedEntity);
             log.info("Maintenance record updated successfully with ID: {}", savedEntity.getId());
             return manutentionMapper.toDto(savedEntity);
         } catch (IllegalArgumentException e) {
@@ -97,7 +97,7 @@ public class ManutentionServiceImpl implements ManutentionService {
     public void delete(String id) {
         log.info("Deleting maintenance record with ID: {}", id);
 
-        Manutention entity = manutentionRepository.findById(id)
+        ManutentionEntity entity = manutentionRepository.findById(id)
                 .orElseThrow(() -> {
                     log.error("Maintenance record not found with ID: {}", id);
                     return new BusinessException("Maintenance record not found with ID: " + id);
@@ -124,7 +124,7 @@ public class ManutentionServiceImpl implements ManutentionService {
         log.debug("Finding maintenance records for vehicle ID: {} with done status: {}", vehicleId, done);
         return manutentionRepository.findAll()
                 .stream()
-                .filter(m -> m.getVehicle().getId().equals(vehicleId) && m.isDone() == done)
+                .filter(m -> m.getVehicleEntity().getId().equals(vehicleId) && m.isDone() == done)
                 .map(manutentionMapper::toDto)
                 .collect(Collectors.toList());
     }

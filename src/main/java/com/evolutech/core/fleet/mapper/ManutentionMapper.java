@@ -2,8 +2,8 @@ package com.evolutech.core.fleet.mapper;
 
 import com.evolutech.core.fleet.model.dto.request.ManutentionRequestDTO;
 import com.evolutech.core.fleet.model.dto.response.ManutentionResponseDTO;
-import com.evolutech.core.fleet.model.entity.Manutention;
-import com.evolutech.core.fleet.model.entity.Vehicle;
+import com.evolutech.core.fleet.model.entity.ManutentionEntity;
+import com.evolutech.core.fleet.model.entity.VehicleEntity;
 import com.evolutech.core.fleet.repository.VehicleRepository;
 import org.springframework.stereotype.Component;
 
@@ -16,15 +16,15 @@ public class ManutentionMapper  {
         this.vehicleRepository = vehicleRepository;
     }
 
-    public Manutention toEntity(ManutentionRequestDTO dto) {
+    public ManutentionEntity toEntity(ManutentionRequestDTO dto) {
         if (dto == null) {
             return null;
         }
 
-        Vehicle vehicle = vehicleRepository.findById(dto.getVehicleId())
+        VehicleEntity vehicleEntity = vehicleRepository.findById(dto.getVehicleId())
                 .orElseThrow(() -> new IllegalArgumentException("Vehicle not found"));
 
-        return Manutention.builder()
+        return ManutentionEntity.builder()
                 .id(dto.getId())
                 .manutentionDate(dto.getManutentionDate())
                 .description(dto.getDescription())
@@ -33,11 +33,11 @@ public class ManutentionMapper  {
                 .mileage(dto.getMileage())
                 .nextMileage(dto.getNextMileage())
                 .done(dto.isDone())
-                .vehicle(vehicle)
+                .vehicle(vehicleEntity)
                 .build();
     }
 
-    public ManutentionResponseDTO toDto(Manutention entity) {
+    public ManutentionResponseDTO toDto(ManutentionEntity entity) {
         if (entity == null) {
             return null;
         }
@@ -51,13 +51,13 @@ public class ManutentionMapper  {
                 .mileage(entity.getMileage())
                 .nextMileage(entity.getNextMileage())
                 .done(entity.isDone())
-                .vehicleId(entity.getVehicle().getId())
+                .vehicleId(entity.getVehicleEntity().getId())
                 .createdAt(entity.getCreatedAt())
                 .updatedAt(entity.getUpdatedAt())
                 .build();
     }
 
-    public Manutention updateEntity(ManutentionRequestDTO dto, Manutention entity) {
+    public ManutentionEntity updateEntity(ManutentionRequestDTO dto, ManutentionEntity entity) {
         if (dto == null || entity == null) {
             return entity;
         }
@@ -71,9 +71,9 @@ public class ManutentionMapper  {
         entity.setDone(dto.isDone());
 
         if (dto.getVehicleId() != null) {
-            Vehicle vehicle = vehicleRepository.findById(dto.getVehicleId())
+            VehicleEntity vehicleEntity = vehicleRepository.findById(dto.getVehicleId())
                     .orElseThrow(() -> new IllegalArgumentException("Vehicle not found"));
-            entity.setVehicle(vehicle);
+            entity.setVehicleEntity(vehicleEntity);
         }
 
         return entity;
