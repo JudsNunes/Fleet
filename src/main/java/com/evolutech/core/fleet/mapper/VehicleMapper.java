@@ -1,7 +1,7 @@
 package com.evolutech.core.fleet.mapper;
 
-import com.evolutech.core.fleet.api.model.VehicleRequestDTO;
-import com.evolutech.core.fleet.api.model.VehicleResponseDTO;
+import com.evolutech.core.fleet.model.dto.request.VehicleRequestDTO;
+import com.evolutech.core.fleet.model.dto.response.VehicleResponseDTO;
 import com.evolutech.core.fleet.model.entity.Vehicle;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;

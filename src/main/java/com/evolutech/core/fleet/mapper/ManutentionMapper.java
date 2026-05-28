@@ -1,7 +1,7 @@
 package com.evolutech.core.fleet.mapper;
 
-import com.evolutech.core.fleet.api.model.ManutentionRequestDTO;
-import com.evolutech.core.fleet.api.model.ManutentionResponseDTO;
+import com.evolutech.core.fleet.model.dto.request.ManutentionRequestDTO;
+import com.evolutech.core.fleet.model.dto.response.ManutentionResponseDTO;
 import com.evolutech.core.fleet.model.entity.Manutention;
 import com.evolutech.core.fleet.model.entity.Vehicle;
 import com.evolutech.core.fleet.repository.VehicleRepository;

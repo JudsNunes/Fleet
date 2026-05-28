@@ -1,7 +1,7 @@
 package com.evolutech.core.fleet.service.impl;
 
-import com.evolutech.core.fleet.api.model.VehicleRequestDTO;
-import com.evolutech.core.fleet.api.model.VehicleResponseDTO;
+import com.evolutech.core.fleet.model.dto.request.VehicleRequestDTO;
+import com.evolutech.core.fleet.model.dto.response.VehicleResponseDTO;
 import com.evolutech.core.fleet.exception.BusinessException;
 import com.evolutech.core.fleet.mapper.VehicleMapper;
 import com.evolutech.core.fleet.repository.VehicleRepository;

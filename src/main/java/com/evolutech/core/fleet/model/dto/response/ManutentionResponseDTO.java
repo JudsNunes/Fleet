@@ -1,4 +1,4 @@
-package com.evolutech.core.fleet.api.model;
+package com.evolutech.core.fleet.model.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
