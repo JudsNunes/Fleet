@@ -171,6 +171,209 @@ paths:
         '500':
           description: Erro interno do servidor
 
+  /maintenances:
+    get:
+      tags:
+        - MaintenanceAPI
+      summary: Listar todas as manutenções
+      operationId: getAllMaintenances
+      responses:
+        '200':
+          description: Lista de manutenções retornada com sucesso
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Maintenance'
+        '500':
+          description: Erro interno do servidor
+    post:
+      tags:
+        - MaintenanceAPI
+      summary: Criar uma nova manutenção
+      operationId: createMaintenance
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MaintenanceRequest'
+      responses:
+        '201':
+          description: Manutenção criada com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Maintenance'
+        '400':
+          description: Dados inválidos
+        '409':
+          description: Manutenção já existe
+        '500':
+          description: Erro interno do servidor
+
+  /maintenances/{id}:
+    get:
+      tags:
+        - MaintenanceAPI
+      summary: Buscar manutenção por ID
+      operationId: getMaintenanceById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Manutenção encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Maintenance'
+        '404':
+          description: Manutenção não encontrada
+        '500':
+          description: Erro interno do servidor
+    put:
+      tags:
+        - MaintenanceAPI
+      summary: Atualizar uma manutenção
+      operationId: updateMaintenance
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MaintenanceRequest'
+      responses:
+        '200':
+          description: Manutenção atualizada com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Maintenance'
+        '400':
+          description: Dados inválidos
+        '404':
+          description: Manutenção não encontrada
+        '500':
+          description: Erro interno do servidor
+    delete:
+      tags:
+        - MaintenanceAPI
+      summary: Deletar uma manutenção
+      operationId: deleteMaintenance
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '204':
+          description: Manutenção deletada com sucesso
+        '404':
+          description: Manutenção não encontrada
+        '500':
+          description: Erro interno do servidor
+
+  /maintenances/vehicle/{vehicleId}:
+    get:
+      tags:
+        - MaintenanceAPI
+      summary: Listar manutenções por veículo
+      operationId: getMaintenancesByVehicleId
+      parameters:
+        - name: vehicleId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Manutenções encontradas
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Maintenance'
+        '404':
+          description: Nenhuma manutenção encontrada
+        '500':
+          description: Erro interno do servidor
+
+  /maintenances/vehicle/{vehicleId}/done:
+    get:
+      tags:
+        - MaintenanceAPI
+      summary: Listar manutenções por veículo e status
+      operationId: getMaintenancesByVehicleIdAndDone
+      parameters:
+        - name: vehicleId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: done
+          in: query
+          required: true
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Manutenções encontradas
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Maintenance'
+        '404':
+          description: Nenhuma manutenção encontrada
+        '500':
+          description: Erro interno do servidor
+
+  /maintenances/done:
+    get:
+      tags:
+        - MaintenanceAPI
+      summary: Listar manutenções por status
+      operationId: getMaintenancesByDone
+      parameters:
+        - name: done
+          in: query
+          required: true
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Manutenções encontradas
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Maintenance'
+        '404':
+          description: Nenhuma manutenção encontrada
+        '500':
+          description: Erro interno do servidor
+
+
 components:
   schemas:
     Vehicle:
@@ -297,3 +500,80 @@ components:
           description: Data da última atualização
           example: 2023-02-01T14:30:00Z
 
+    Maintenance:
+      type: object
+      required:
+        - id
+        - vehicleId
+        - description
+        - cost
+        - done
+        - maintenanceDate
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: ID único da manutenção
+        vehicleId:
+          type: integer
+          format: int64
+          description: ID do veículo
+        description:
+          type: string
+          description: Descrição da manutenção
+          example: Troca de óleo
+        cost:
+          type: number
+          format: double
+          description: Custo da manutenção
+          example: 150.00
+        done:
+          type: boolean
+          description: Status da manutenção
+          example: false
+        maintenanceDate:
+          type: string
+          format: date
+          description: Data da manutenção
+          example: 2024-01-15
+        createdAt:
+          type: string
+          format: date-time
+          description: Data de criação
+          example: 2024-01-15T10:00:00Z
+        updatedAt:
+          type: string
+          format: date-time
+          description: Data da última atualização
+          example: 2024-01-20T14:30:00Z
+    MaintenanceRequest:
+      type: object
+      required:
+        - vehicleId
+        - description
+        - cost
+        - done
+        - maintenanceDate
+      properties:
+        vehicleId:
+          type: integer
+          format: int64
+          description: ID do veículo
+        description:
+          type: string
+          description: Descrição da manutenção
+          example: Troca de óleo
+        cost:
+          type: number
+          format: double
+          description: Custo da manutenção
+          example: 150.00
+        done:
+          type: boolean
+          description: Status da manutenção
+          example: false
+        maintenanceDate:
+          type: string
+          format: date
+          description: Data da manutenção
+          example: 2024-01-15
