@@ -14,11 +14,9 @@ public interface VehicleMapper {
 
     VehicleEntity toEntity(VehicleRequestDTO request);
 
-  
     VehicleResponseDTO toResponseDTO(VehicleEntity vehicleEntity);
 
     List<VehicleResponseDTO> toResponseDTOList(List<VehicleEntity> vehicleEntities);
-
 
     VehicleDTO toVehicleDTO(VehicleEntity vehicleEntity);
 
