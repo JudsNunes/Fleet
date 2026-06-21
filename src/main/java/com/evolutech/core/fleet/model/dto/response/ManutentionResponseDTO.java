@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Data
 @Builder
@@ -14,7 +15,7 @@ import java.time.LocalDate;
 @AllArgsConstructor
 public class ManutentionResponseDTO {
 
-    private String id;
+    private Long id;
 
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate manutentionDate;
@@ -29,14 +30,14 @@ public class ManutentionResponseDTO {
 
     private Double nextMileage;
 
-    private boolean done;
+    private String done;
 
     private Long vehicleId;
 
-    @JsonFormat(pattern = "yyyy-MM-dd")
-    private LocalDate createdAt;
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    private LocalDateTime createdAt;
 
-    @JsonFormat(pattern = "yyyy-MM-dd")
-    private LocalDate updatedAt;
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    private LocalDateTime updatedAt;
 }
 
