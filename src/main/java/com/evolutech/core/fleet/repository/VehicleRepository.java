@@ -19,6 +19,12 @@ public interface VehicleRepository extends JpaRepository<VehicleEntity, String> 
     @Query("SELECT v FROM VehicleEntity v WHERE v.deletedAt IS NULL AND v.plate = :plate")
     Optional<VehicleEntity> findByPlateAndNotDeleted(@Param("plate") String plate);
 
+    @Query("SELECT v FROM VehicleEntity v WHERE v.deletedAt IS NULL AND v.chassis = :chassis")
+    Optional<VehicleEntity> findByChassisAndNotDeleted(@Param("chassis") String chassis);
+
+    @Query("SELECT v FROM VehicleEntity v WHERE v.deletedAt IS NULL AND v.renavam = :renavam")
+    Optional<VehicleEntity> findByRenavamAndNotDeleted(@Param("renavam") String renavam);
+
     @Query("SELECT v FROM VehicleEntity v WHERE v.deletedAt IS NULL ORDER BY v.plate ASC")
     Page<VehicleEntity> findAllActive(Pageable pageable);
 
