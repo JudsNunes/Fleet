@@ -4,6 +4,7 @@ import com.evolutech.core.fleet.model.dto.request.VehicleRequestDTO;
 import com.evolutech.core.fleet.model.dto.response.VehicleResponseDTO;
 import com.evolutech.core.fleet.exception.BusinessException;
 import com.evolutech.core.fleet.mapper.VehicleMapper;
+import com.evolutech.core.fleet.model.entity.VehicleEntity;
 import com.evolutech.core.fleet.repository.VehicleRepository;
 import com.evolutech.core.fleet.service.VehicleService;
 import com.evolutech.fleet.api.model.VehicleDTO;
@@ -108,14 +109,6 @@ public class VehicleServiceImpl implements VehicleService {
         return findAllPaged(pageable).getContent();
     }
 
-    @Override
-    @Transactional
-    public Page<VehicleDTO> findAllPaged(Pageable pageable) {
-        log.info("Starting findAllPaged with pageable: {}", pageable);
-        Page<VehicleResponseDTO> page = vehicleRepository.findAllActive(pageable)
-                .map(vehicleMapper::toResponseDTO);
-        log.debug("Found {} active vehicles", page.getTotalElements());
-        return page.map(vehicleMapper::toVehicleDTO);
-    }
+
 }
 

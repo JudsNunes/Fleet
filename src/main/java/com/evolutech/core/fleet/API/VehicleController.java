@@ -25,7 +25,7 @@ public class VehicleController implements VehiclesApi {
     private final VehicleService vehicleService;
 
     @Override
-    public ResponseEntity<VehicleDTO> createVehicle (@Valid @RequestBody VehicleRequestDTO vehicleRequestDTO) {
+    public ResponseEntity<VehicleDTO> createVehicle(@Valid @RequestBody VehicleRequestDTO vehicleRequestDTO) {
         log.info("Creating new vehicle with plate: {}", vehicleRequestDTO.getPlate());
         try {
             var responseDTO = vehicleService.save(vehicleRequestDTO);
@@ -78,23 +78,17 @@ public class VehicleController implements VehiclesApi {
     }
 
     @Override
-    public ResponseEntity<VehicleDTO> updateVehicle(
-            @PathVariable Long id,
-            @Valid @RequestBody VehicleRequestDTO vehicleRequestDTO) {
+    public ResponseEntity<VehicleDTO> updateVehicle(@PathVariable Long id, @Valid @RequestBody VehicleRequestDTO vehicleRequestDTO) {
         log.info("Updating vehicle with ID: {}", id);
         try {
-            if (vehicleService.findById(id).isEmpty()) {
-                log.warn("Vehicle not found with ID: {} for update", id);
-                return ResponseEntity.notFound().build();
-            }
-            var responseDTO = vehicleService.update(vehicleRequestDTO);
+            var updatedVehicle = vehicleService.update(vehicleRequestDTO);
             log.debug("Vehicle with ID: {} updated successfully", id);
-            return ResponseEntity.ok(responseDTO);
+            return ResponseEntity.ok(updatedVehicle);
+        } catch (BusinessException e) {
+            log.warn("Vehicle not found for update with ID: {}", id);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         } catch (IllegalArgumentException e) {
             log.error("Invalid data for vehicle update: {}", e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        } catch (BusinessException e) {
-            log.error("Business error updating vehicle: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         } catch (Exception e) {
             log.error("Error updating vehicle with ID: {}: {}", id, e.getMessage(), e);

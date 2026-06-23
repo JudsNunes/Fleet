@@ -20,5 +20,7 @@ public interface VehicleMapper {
 
     VehicleDTO toVehicleDTO(VehicleEntity vehicleEntity);
 
+    VehicleDTO pageableToVehicleDTO(VehicleEntity vehicleEntity);
+
 }
 

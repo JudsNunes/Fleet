@@ -8,6 +8,8 @@ import com.evolutech.core.fleet.model.entity.ManutentionEntity;
 import com.evolutech.core.fleet.model.utils.enums.ManutentionDoneStatus;
 import com.evolutech.core.fleet.repository.ManutentionRepository;
 import com.evolutech.core.fleet.service.ManutentionService;
+import com.evolutech.fleet.api.model.MaintenanceRequestDTO;
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -19,7 +21,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -35,14 +36,14 @@ public class ManutentionServiceImpl implements ManutentionService {
     }
 
     @Override
-    public ManutentionResponseDTO save(ManutentionRequestDTO request) {
+    public ManutentionResponseDTO save(@Valid MaintenanceRequestDTO request) {
         log.info("Creating new maintenance record with description: {}", request.getDescription());
 
         try {
             ManutentionEntity entity = manutentionMapper.toEntity(request);
             ManutentionEntity savedEntity = manutentionRepository.save(entity);
             log.info("Maintenance record created successfully with ID: {}", savedEntity.getId());
-            return manutentionMapper.toDto(savedEntity);
+            return manutentionMapper.toResponseDTO(savedEntity);
         } catch (IllegalArgumentException e) {
             log.error("Error creating maintenance record: {}", e.getMessage());
             throw new BusinessException("Failed to create maintenance record: " + e.getMessage());
@@ -54,7 +55,7 @@ public class ManutentionServiceImpl implements ManutentionService {
     public Optional<ManutentionResponseDTO> findById(Long id) {
         log.debug("Finding maintenance record with ID: {}", id);
         return manutentionRepository.findById(id)
-                .map(manutentionMapper::toDto);
+                .map(manutentionMapper::toResponseDTO);
     }
 
     @Override
@@ -70,7 +71,7 @@ public class ManutentionServiceImpl implements ManutentionService {
     public Page<ManutentionResponseDTO> findAllPaged(Pageable pageable) {
         log.debug("Finding all maintenance records paged");
         return manutentionRepository.findAllActive(pageable)
-                .map(manutentionMapper::toDto);
+                .map(manutentionMapper::toResponseDTO);
     }
 
     @Override
@@ -85,7 +86,7 @@ public class ManutentionServiceImpl implements ManutentionService {
     public Page<ManutentionResponseDTO> findByVehicleIdPaged(Long vehicleId, Pageable pageable) {
         log.debug("Finding maintenance records paged for vehicle ID: {}", vehicleId);
         return manutentionRepository.findByVehicleIdAndNotDeleted(vehicleId, pageable)
-                .map(manutentionMapper::toDto);
+                .map(manutentionMapper::toResponseDTO);
     }
 
     @Override
@@ -102,7 +103,7 @@ public class ManutentionServiceImpl implements ManutentionService {
             ManutentionEntity updatedEntity = manutentionMapper.updateEntity(request, entity);
             ManutentionEntity savedEntity = manutentionRepository.save(updatedEntity);
             log.info("Maintenance record updated successfully with ID: {}", savedEntity.getId());
-            return manutentionMapper.toDto(savedEntity);
+            return manutentionMapper.toResponseDTO(savedEntity);
         } catch (IllegalArgumentException e) {
             log.error("Error updating maintenance record: {}", e.getMessage());
             throw new BusinessException("Failed to update maintenance record: " + e.getMessage());
@@ -137,7 +138,7 @@ public class ManutentionServiceImpl implements ManutentionService {
     public Page<ManutentionResponseDTO> findByDonePaged(ManutentionDoneStatus done, Pageable pageable) {
         log.debug("Finding maintenance records paged with done status: {}", done);
         return manutentionRepository.findByDoneAndNotDeleted(done, pageable)
-                .map(manutentionMapper::toDto);
+                .map(manutentionMapper::toResponseDTO);
     }
 
     @Override
@@ -153,7 +154,7 @@ public class ManutentionServiceImpl implements ManutentionService {
     public Page<ManutentionResponseDTO> findByVehicleIdAndDonePaged(Long vehicleId, ManutentionDoneStatus done, Pageable pageable) {
         log.debug("Finding maintenance records paged for vehicle ID: {} with done status: {}", vehicleId, done);
         return manutentionRepository.findByVehicleIdAndDoneAndNotDeleted(vehicleId, done, pageable)
-                .map(manutentionMapper::toDto);
+                .map(manutentionMapper::toResponseDTO);
     }
 }
 

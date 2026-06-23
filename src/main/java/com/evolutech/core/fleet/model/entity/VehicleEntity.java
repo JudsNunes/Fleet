@@ -1,6 +1,6 @@
 package com.evolutech.core.fleet.model.entity;
 
-import com.evolutech.core.fleet.model.utils.enums.VehicleStatus;
+
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -59,7 +59,7 @@ public class VehicleEntity {
 
     @Column(nullable = false, length = 50)
     @Enumerated(EnumType.STRING)
-    private VehicleStatus status = VehicleStatus.ACTIVE;
+    private String vehicleStatus;
 
     @CreatedDate
     @Column(nullable = false, updatable = false)

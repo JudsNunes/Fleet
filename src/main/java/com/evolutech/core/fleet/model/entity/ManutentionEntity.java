@@ -68,14 +68,7 @@ public class ManutentionEntity {
     private ManutentionDoneStatus done = ManutentionDoneStatus.PENDING;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(
-        name = "vehicle_id",
-        nullable = false,
-        foreignKey = @ForeignKey(
-            name = "fk_vehicle_id",
-            constraintMode = ConstraintMode.CONSTRAINT
-        )
-    )
+    @JoinColumn(name = "vehicle_id")
     private VehicleEntity vehicle;
 
     @CreatedDate
