@@ -1,0 +1,15 @@
+.git
+.gitignore
+.github
+.idea
+.vscode
+*.iml
+target/
+build/
+docs/
+openspec/
+*.md
+!README.md
+.env
+docker-compose*.yaml
+.dockerignore
