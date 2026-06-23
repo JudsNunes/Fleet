@@ -1,5 +1,7 @@
 package com.evolutech.core.fleet.model.entity;
 
+import com.evolutech.core.fleet.model.utils.enums.ManutentionDoneStatus;
+import com.evolutech.core.fleet.model.utils.enums.typeCost;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -10,10 +12,21 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @EntityListeners(AuditingEntityListener.class)
-@Table(name = "TBG_MANUTENTION")
+@Table(
+    name = "manutention",
+    indexes = {
+        @Index(name = "idx_vehicle_id", columnList = "vehicle_id"),
+        @Index(name = "idx_manutention_date", columnList = "manutention_date"),
+        @Index(name = "idx_done_status", columnList = "done"),
+        @Index(name = "idx_vehicle_id_done", columnList = "vehicle_id,done"),
+        @Index(name = "idx_created_at", columnList = "created_at"),
+        @Index(name = "idx_deleted_at", columnList = "deleted_at")
+    }
+)
 @Getter
 @Setter
 @AllArgsConstructor
@@ -22,27 +35,50 @@ import java.time.LocalDate;
 public class ManutentionEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @EqualsAndHashCode.Include
-    private String id;
+    private Long id;
+
     @NotNull
+    @Column(nullable = false)
     private LocalDate manutentionDate;
+
     @NotBlank
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String description;
-    @NotBlank
-    private String type;
+
+    @Column(nullable = false, length = 50)
+    @Enumerated(EnumType.STRING)
+    private typeCost type;
+
     @Positive
+    @Column(nullable = false)
     private Double cost;
+
     @Positive
+    @Column(nullable = false)
     private Double mileage;
+
     @Positive
+    @Column(nullable = false)
     private Double nextMileage;
-    private boolean done;
-    @ManyToOne
-    @JoinColumn(name = "vehicle_id", nullable = false)
-    private VehicleEntity vehicleEntity;
+
+    @Column(nullable = false, length = 50)
+    @Enumerated(EnumType.STRING)
+    private ManutentionDoneStatus done = ManutentionDoneStatus.PENDING;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "vehicle_id")
+    private VehicleEntity vehicle;
+
     @CreatedDate
-    private LocalDate createdAt;
+    @Column(nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+
     @LastModifiedDate
-    private LocalDate updatedAt;
+    @Column(nullable = false)
+    private LocalDateTime updatedAt;
+
+    @Column(insertable = false)
+    private LocalDateTime deletedAt;
 }

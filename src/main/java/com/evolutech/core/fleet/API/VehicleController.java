@@ -4,8 +4,13 @@ import com.evolutech.core.fleet.exception.BusinessException;
 import com.evolutech.core.fleet.model.dto.request.VehicleRequestDTO;
 import com.evolutech.core.fleet.service.VehicleService;
 import com.evolutech.fleet.api.VehiclesApi;
+import com.evolutech.fleet.api.model.VehicleDTO;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -13,15 +18,14 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/vehicles")
 @RequiredArgsConstructor
 @Slf4j
 public class VehicleController implements VehiclesApi {
 
     private final VehicleService vehicleService;
 
-    @PostMapping
-    public ResponseEntity<VehicleResponseDTO> createVehicle(@RequestBody VehicleRequestDTO vehicleRequestDTO) {
+    @Override
+    public ResponseEntity<VehicleDTO> createVehicle(@Valid @RequestBody VehicleRequestDTO vehicleRequestDTO) {
         log.info("Creating new vehicle with plate: {}", vehicleRequestDTO.getPlate());
         try {
             var responseDTO = vehicleService.save(vehicleRequestDTO);
@@ -39,8 +43,8 @@ public class VehicleController implements VehiclesApi {
         }
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<VehicleResponseDTO> getVehicleById(@PathVariable Long id) {
+    @Override
+    public ResponseEntity<VehicleDTO> getVehicleById(@PathVariable Long id) {
         log.info("Fetching vehicle with ID: {}", id);
         try {
             var vehicle = vehicleService.findById(id);
@@ -59,12 +63,13 @@ public class VehicleController implements VehiclesApi {
         }
     }
 
-    @GetMapping
-    public ResponseEntity<List<VehicleResponseDTO>> getAllVehicles() {
-        log.info("Fetching all vehicles");
+    @Override
+    public ResponseEntity<Page<VehicleDTO>> getAllVehicles(
+            @PageableDefault(size = 20, page = 0) Pageable pageable) {
+        log.info("Fetching vehicles with pagination: page={}, size={}", pageable.getPageNumber(), pageable.getPageSize());
         try {
-            var vehicles = vehicleService.findAll();
-            log.debug("Found {} vehicles", vehicles.size());
+            var vehicles = vehicleService.findAllPaged(pageable);
+            log.debug("Found {} vehicles in page {}", vehicles.getNumberOfElements(), pageable.getPageNumber());
             return ResponseEntity.ok(vehicles);
         } catch (Exception e) {
             log.error("Error fetching all vehicles: {}", e.getMessage(), e);
@@ -72,24 +77,18 @@ public class VehicleController implements VehiclesApi {
         }
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<VehicleResponseDTO> updateVehicle(
-            @PathVariable Long id,
-            @RequestBody VehicleRequestDTO vehicleRequestDTO) {
+    @Override
+    public ResponseEntity<VehicleDTO> updateVehicle(@PathVariable Long id, @Valid @RequestBody VehicleRequestDTO vehicleRequestDTO) {
         log.info("Updating vehicle with ID: {}", id);
         try {
-            if (vehicleService.findById(id).isEmpty()) {
-                log.warn("Vehicle not found with ID: {} for update", id);
-                return ResponseEntity.notFound().build();
-            }
-            var responseDTO = vehicleService.update(vehicleRequestDTO);
+            var updatedVehicle = vehicleService.update(vehicleRequestDTO);
             log.debug("Vehicle with ID: {} updated successfully", id);
-            return ResponseEntity.ok(responseDTO);
+            return ResponseEntity.ok(updatedVehicle);
+        } catch (BusinessException e) {
+            log.warn("Vehicle not found for update with ID: {}", id);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         } catch (IllegalArgumentException e) {
             log.error("Invalid data for vehicle update: {}", e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        } catch (BusinessException e) {
-            log.error("Business error updating vehicle: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         } catch (Exception e) {
             log.error("Error updating vehicle with ID: {}: {}", id, e.getMessage(), e);
@@ -97,7 +96,7 @@ public class VehicleController implements VehiclesApi {
         }
     }
 
-    @DeleteMapping("/{id}")
+    @Override
     public ResponseEntity<Void> deleteVehicle(@PathVariable Long id) {
         log.info("Deleting vehicle with ID: {}", id);
         try {
@@ -113,8 +112,8 @@ public class VehicleController implements VehiclesApi {
         }
     }
 
-    @GetMapping("/search")
-    public ResponseEntity<List<VehicleResponseDTO>> findByIdAndPlate(
+    @Override
+    public ResponseEntity<List<VehicleDTO>> findByIdAndPlate(
             @RequestParam Long id,
             @RequestParam String plate) {
         log.info("Searching vehicle by ID: {} and plate: {}", id, plate);

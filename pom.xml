@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>com.evolutech</groupId>
 	<artifactId>fleet</artifactId>
-	<version>1.0.2-SNAPSHOT</version>
+	<version>1.0.3</version>
 	<name>fleet</name>
 	<description>MVP for fleet management</description>
 
@@ -48,10 +48,21 @@
 			<scope>runtime</scope>
 			<optional>true</optional>
 		</dependency>
+		<!-- Database Drivers -->
 		<dependency>
-			<groupId>org.postgresql</groupId>
-			<artifactId>postgresql</artifactId>
+			<groupId>com.mysql</groupId>
+			<artifactId>mysql-connector-j</artifactId>
+			<version>8.0.33</version>
 			<scope>runtime</scope>
+		</dependency>
+		<!-- Flyway Migration Tool -->
+		<dependency>
+			<groupId>org.flywaydb</groupId>
+			<artifactId>flyway-core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.flywaydb</groupId>
+			<artifactId>flyway-mysql</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.projectlombok</groupId>
