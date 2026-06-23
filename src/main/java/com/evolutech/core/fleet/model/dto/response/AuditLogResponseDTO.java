@@ -12,27 +12,19 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class VehicleResponseDTO {
+public class AuditLogResponseDTO {
 
     private String id;
-
-    private String plate;
-
-    private String model;
-
-    private String brand;
-
-    private Integer year;
-
-    private String color;
-
-    private Double mileage;
-
-    private String status;
-
+    private String entityType;
+    private String entityId;
+    private String action;
+    private String fieldName;
+    private String oldValue;
+    private String newValue;
+    private String userId;
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    private LocalDateTime timestamp;
+    private String ipAddress;
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime createdAt;
-
-    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
-    private LocalDateTime updatedAt;
 }

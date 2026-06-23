@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>com.evolutech</groupId>
 	<artifactId>fleet</artifactId>
-	<version>1.0.3</version>
+	<version>1.0.3-SNAPSHOT</version>
 	<name>fleet</name>
 	<description>MVP for fleet management</description>
 
@@ -108,6 +108,32 @@
 			<groupId>jakarta.annotation</groupId>
 			<artifactId>jakarta.annotation-api</artifactId>
 			<version>2.1.1</version>
+		</dependency>
+
+		<!-- SpringDoc OpenAPI -->
+		<dependency>
+			<groupId>org.springdoc</groupId>
+			<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+			<version>2.6.0</version>
+		</dependency>
+
+		<!-- Test Dependencies -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.testcontainers</groupId>
+			<artifactId>junit-jupiter</artifactId>
+			<version>1.19.8</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.testcontainers</groupId>
+			<artifactId>mysql</artifactId>
+			<version>1.19.8</version>
+			<scope>test</scope>
 		</dependency>
 	</dependencies>
 

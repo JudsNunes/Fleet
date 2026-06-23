@@ -14,10 +14,10 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class VehicleRequestDTO {
 
-    private Long id;
+    private String id;
 
     @NotBlank(message = "Plate is required")
-    @Pattern(regexp = "[A-Z]{3}-\\d{4}", message = "Plate must be in the format ABC-1234")
+    @Pattern(regexp = "([A-Z]{3}\\d[A-Z]\\d{2}|[A-Z]{3}-\\d{4})", message = "Plate must be in Mercosul format (ABC1D23) or old format (ABC-1234)")
     private String plate;
 
     @NotBlank(message = "Model is required")
@@ -33,4 +33,3 @@ public class VehicleRequestDTO {
 
     private Double mileage;
 }
-
