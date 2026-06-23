@@ -6,6 +6,7 @@ import com.evolutech.core.fleet.mapper.VehicleMapper;
 import com.evolutech.core.fleet.model.dto.request.VehicleRequestDTO;
 import com.evolutech.core.fleet.model.dto.response.VehicleResponseDTO;
 import com.evolutech.core.fleet.model.entity.VehicleEntity;
+import com.evolutech.core.fleet.model.utils.enums.FuelType;
 import com.evolutech.core.fleet.model.utils.enums.VehicleStatus;
 import com.evolutech.core.fleet.repository.VehicleRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -54,6 +55,12 @@ class VehicleServiceImplTest {
         vehicleEntity.setColor("Preto");
         vehicleEntity.setMileage(5000.0);
         vehicleEntity.setStatus(VehicleStatus.ACTIVE);
+        vehicleEntity.setChassis("9BWZZZ377VE000001");
+        vehicleEntity.setRenavam("12345678901");
+        vehicleEntity.setFuelType(FuelType.FLEX);
+        vehicleEntity.setCargoCapacityKg(500.0);
+        vehicleEntity.setPassengerCapacity(5);
+        vehicleEntity.setEngineType("2.0");
         vehicleEntity.setCreatedAt(LocalDateTime.now());
         vehicleEntity.setUpdatedAt(LocalDateTime.now());
 
@@ -66,6 +73,12 @@ class VehicleServiceImplTest {
                 .color("Preto")
                 .mileage(5000.0)
                 .status("ACTIVE")
+                .chassis("9BWZZZ377VE000001")
+                .renavam("12345678901")
+                .fuelType("FLEX")
+                .cargoCapacityKg(500.0)
+                .passengerCapacity(5)
+                .engineType("2.0")
                 .build();
 
         vehicleRequestDTO = VehicleRequestDTO.builder()
@@ -75,6 +88,12 @@ class VehicleServiceImplTest {
                 .year(2023)
                 .color("Preto")
                 .mileage(5000.0)
+                .chassis("9BWZZZ377VE000001")
+                .renavam("12345678901")
+                .fuelType("FLEX")
+                .cargoCapacityKg(500.0)
+                .passengerCapacity(5)
+                .engineType("2.0")
                 .build();
     }
 

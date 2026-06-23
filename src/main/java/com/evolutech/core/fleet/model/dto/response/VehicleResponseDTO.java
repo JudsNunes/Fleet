@@ -15,24 +15,21 @@ import java.time.LocalDateTime;
 public class VehicleResponseDTO {
 
     private String id;
-
     private String plate;
-
     private String model;
-
     private String brand;
-
     private Integer year;
-
     private String color;
-
     private Double mileage;
-
     private String status;
-
+    private String chassis;
+    private String renavam;
+    private String fuelType;
+    private Double cargoCapacityKg;
+    private Integer passengerCapacity;
+    private String engineType;
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime createdAt;
-
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime updatedAt;
 }
