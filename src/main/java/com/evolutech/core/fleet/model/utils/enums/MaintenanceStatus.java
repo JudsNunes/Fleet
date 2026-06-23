@@ -1,7 +1,8 @@
 package com.evolutech.core.fleet.model.utils.enums;
 
-public enum ManutentionDoneStatus {
+public enum MaintenanceStatus {
     PENDING,
     IN_PROGRESS,
-    COMPLETED
+    COMPLETED,
+    OVERDUE
 }

@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class VehicleResponseDTO {
 
-    private Long id;
+    private String id;
 
     private String plate;
 
@@ -28,10 +28,11 @@ public class VehicleResponseDTO {
 
     private Double mileage;
 
+    private String status;
+
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime createdAt;
 
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime updatedAt;
 }
-

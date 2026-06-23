@@ -13,12 +13,12 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ManutentionResponseDTO {
+public class MaintenanceResponseDTO {
 
-    private Long id;
+    private String id;
 
     @JsonFormat(pattern = "yyyy-MM-dd")
-    private LocalDate manutentionDate;
+    private LocalDate maintenanceDate;
 
     private String description;
 
@@ -30,9 +30,9 @@ public class ManutentionResponseDTO {
 
     private Double nextMileage;
 
-    private String done;
+    private String status;
 
-    private Long vehicleId;
+    private String vehicleId;
 
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime createdAt;
@@ -40,4 +40,3 @@ public class ManutentionResponseDTO {
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime updatedAt;
 }
-

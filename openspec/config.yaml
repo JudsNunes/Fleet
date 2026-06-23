@@ -1,0 +1,39 @@
+schema: spec-driven
+
+context: |
+  Project: Fleet Management Core (Evolutech) - CORE do sistema de gestão de frota veicular
+  Arquitetura: BFF Pattern - este serviço é o CORE que será consumido por um BFF (Backend for Frontend).
+    O BFF não acessa diretamente a camada de serviço; ele chama este CORE via REST.
+    Auth será extraído para service separado posteriormente.
+  Escopo do MVP: todas as nuâncias de frota veicular — gestão de veículos, manutenções, viagens, motoristas, despesas.
+  Tech stack: Java 17, Spring Boot 4.0.2, MySQL, Flyway, MapStruct, Lombok, SpringDoc OpenAPI
+  Build: Maven, OpenAPI Generator (spring), Testcontainers
+  API: REST OpenAPI 3.0, prefixo /api/v1
+  Domain: Vehicle CRUD, Maintenance CRUD, Trip management, soft-delete, paginação, UUID IDs
+  Naming: Entities (VehicleEntity, MaintenanceEntity), DTOs (VehicleRequestDTO, VehicleResponseDTO)
+  Package: com.evolutech.core.fleet (controller em API/, service/, repository/, mapper/, model/, exception/)
+  Conventions: MapStruct para mappers, Lombok @Builder/@Data, @ControllerAdvice global, ErrorResponse padronizado
+  Database: MySQL com Flyway, ddl-auto=none
+  Testing: Testcontainers MySQL, MockMvc
+  Architecture doc: ARQUITETURA_FLEET.md com backlog completo (épicos, features, user stories, tasks)
+  Languages: Portuguese for docs/commit messages, English for code
+  Auth: Por enquanto sem auth neste service. Auth será service separado (Keycloak/Outro).
+    Quando implementado, BFF propagará JWT/token para este CORE.
+
+rules:
+  proposal:
+    - Escrever em português quando o público for a equipe
+    - Incluir seção "Não-objetivos" (Non-goals)
+    - Referenciar épicos/features do ARQUITETURA_FLEET.md quando aplicável
+    - Limitar a 500 palavras
+    - Considerar impacto no BFF Pattern (como BFF consumirá esta mudança)
+    - Explorar cenários de melhoria quando pertinente
+  tasks:
+    - Break tasks into chunks of max 2 hours
+    - Incluir tipo (Backend/Frontend/Infra/Test/Docs/Contract) na task
+    - Referenciar JFE-TASK-XXX ou JFE-US-XXX quando existir no backlog
+    - Especificar arquivos afetados quando relevante
+  specs:
+    - Manter contratos OpenAPI sincronizados com implementação
+    - Usar schemas reutilizáveis (components/schemas)
+    - Descrever todos os status codes de resposta
