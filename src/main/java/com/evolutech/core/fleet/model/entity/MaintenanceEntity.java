@@ -71,6 +71,18 @@ public class MaintenanceEntity {
     @JoinColumn(name = "vehicle_id", nullable = false)
     private VehicleEntity vehicle;
 
+    @Column(length = 50)
+    private String invoiceFuelType;
+
+    @Column
+    private Double litersFilled;
+
+    @Column
+    private Double distanceTraveled;
+
+    @Column
+    private Boolean anomalousConsumption;
+
     @CreatedDate
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;

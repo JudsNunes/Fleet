@@ -41,4 +41,10 @@ public class MaintenanceRequestDTO {
 
     @NotNull(message = "Vehicle ID is required")
     private String vehicleId;
+
+    private String invoiceFuelType;
+
+    private Double litersFilled;
+
+    private Double distanceTraveled;
 }

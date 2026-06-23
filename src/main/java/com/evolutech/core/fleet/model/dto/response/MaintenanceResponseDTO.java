@@ -34,6 +34,14 @@ public class MaintenanceResponseDTO {
 
     private String vehicleId;
 
+    private String invoiceFuelType;
+
+    private Double litersFilled;
+
+    private Double distanceTraveled;
+
+    private Boolean anomalousConsumption;
+
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime createdAt;
 
