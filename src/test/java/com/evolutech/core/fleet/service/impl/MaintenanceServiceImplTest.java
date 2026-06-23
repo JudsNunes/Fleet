@@ -5,10 +5,12 @@ import com.evolutech.core.fleet.mapper.MaintenanceMapper;
 import com.evolutech.core.fleet.model.dto.request.MaintenanceRequestDTO;
 import com.evolutech.core.fleet.model.dto.response.MaintenanceResponseDTO;
 import com.evolutech.core.fleet.model.entity.MaintenanceEntity;
+import com.evolutech.core.fleet.model.entity.ServiceOrderEntity;
 import com.evolutech.core.fleet.model.entity.VehicleEntity;
 import com.evolutech.core.fleet.model.utils.enums.MaintenanceStatus;
 import com.evolutech.core.fleet.model.utils.enums.MaintenanceType;
 import com.evolutech.core.fleet.repository.MaintenanceRepository;
+import com.evolutech.core.fleet.repository.ServiceOrderRepository;
 import com.evolutech.core.fleet.repository.VehicleRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -38,6 +40,9 @@ class MaintenanceServiceImplTest {
 
     @Mock
     private VehicleRepository vehicleRepository;
+
+    @Mock
+    private ServiceOrderRepository serviceOrderRepository;
 
     @Mock
     private MaintenanceMapper maintenanceMapper;
@@ -89,13 +94,19 @@ class MaintenanceServiceImplTest {
                 .mileage(50000.0)
                 .nextMileage(60000.0)
                 .vehicleId("550e8400-e29b-41d4-a716-446655440000")
+                .serviceOrderId("550e8400-e29b-41d4-a716-446655440002")
                 .build();
     }
 
     @Test
     void save_Success() {
+        ServiceOrderEntity serviceOrderEntity = new ServiceOrderEntity();
+        serviceOrderEntity.setId("550e8400-e29b-41d4-a716-446655440002");
+        serviceOrderEntity.setStatus(com.evolutech.core.fleet.model.utils.enums.ServiceOrderStatus.APPROVED);
+
         when(vehicleRepository.findById(anyString())).thenReturn(Optional.of(vehicleEntity));
-        when(maintenanceMapper.toEntity(any(MaintenanceRequestDTO.class), any(VehicleEntity.class)))
+        when(serviceOrderRepository.findById(anyString())).thenReturn(Optional.of(serviceOrderEntity));
+        when(maintenanceMapper.toEntity(any(MaintenanceRequestDTO.class), any(VehicleEntity.class), any(ServiceOrderEntity.class)))
                 .thenReturn(maintenanceEntity);
         when(maintenanceRepository.save(any(MaintenanceEntity.class))).thenReturn(maintenanceEntity);
         when(maintenanceMapper.toResponseDTO(any(MaintenanceEntity.class))).thenReturn(maintenanceResponseDTO);
@@ -134,8 +145,12 @@ class MaintenanceServiceImplTest {
 
     @Test
     void update_Success() {
+        ServiceOrderEntity serviceOrderEntity = new ServiceOrderEntity();
+        serviceOrderEntity.setId("550e8400-e29b-41d4-a716-446655440002");
+
         when(maintenanceRepository.findById(anyString())).thenReturn(Optional.of(maintenanceEntity));
         when(vehicleRepository.findById(anyString())).thenReturn(Optional.of(vehicleEntity));
+        when(serviceOrderRepository.findById(anyString())).thenReturn(Optional.of(serviceOrderEntity));
         when(maintenanceRepository.save(any(MaintenanceEntity.class))).thenReturn(maintenanceEntity);
         when(maintenanceMapper.toResponseDTO(any(MaintenanceEntity.class))).thenReturn(maintenanceResponseDTO);
 
