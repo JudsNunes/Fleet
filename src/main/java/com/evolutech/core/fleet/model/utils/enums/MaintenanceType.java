@@ -1,7 +1,7 @@
 package com.evolutech.core.fleet.model.utils.enums;
 
-public enum typeCost {
-    MANUTENTION,
+public enum MaintenanceType {
+    MAINTENANCE,
     FUEL,
     TOLL,
     PARKING,

@@ -2,7 +2,7 @@ package com.evolutech.core.fleet.service;
 
 import com.evolutech.core.fleet.model.dto.request.VehicleRequestDTO;
 import com.evolutech.core.fleet.model.dto.response.VehicleResponseDTO;
-import com.evolutech.fleet.api.model.VehicleDTO;
+import com.evolutech.core.fleet.model.utils.enums.VehicleStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -11,23 +11,19 @@ import java.util.Optional;
 
 public interface VehicleService {
 
-    VehicleDTO save(VehicleRequestDTO request);
+    VehicleResponseDTO save(VehicleRequestDTO request);
 
-    Optional<VehicleDTO> findById(Long id);
+    Optional<VehicleResponseDTO> findById(String id);
 
-    List<VehicleDTO> findAll();
+    List<VehicleResponseDTO> findAll();
 
-    /**
-     * Find all vehicles with pagination support
-     * @param pageable Pagination parameters (page, size, sort)
-     * @return Page of VehicleDTO with pagination metadata
-     */
-    Page<VehicleDTO> findAllPaged(Pageable pageable);
+    Page<VehicleResponseDTO> findAllPaged(Pageable pageable);
 
-    VehicleDTO update(VehicleRequestDTO request);
+    Page<VehicleResponseDTO> findByFilters(String plate, String brand, VehicleStatus status, Pageable pageable);
 
-    void delete(Long id);
+    VehicleResponseDTO update(String id, VehicleRequestDTO body);
 
-    Optional<VehicleDTO> findByPlate(VehicleRequestDTO request);
+    VehicleResponseDTO updateStatus(String id, VehicleStatus status);
+
+    void delete(String id);
 }
-

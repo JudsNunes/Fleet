@@ -14,12 +14,12 @@ import java.time.LocalDate;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ManutentionRequestDTO {
+public class MaintenanceRequestDTO {
 
-    private Long id;
+    private String id;
 
     @NotNull(message = "Maintenance date is required")
-    private LocalDate manutentionDate;
+    private LocalDate maintenanceDate;
 
     @NotBlank(message = "Description is required")
     private String description;
@@ -39,9 +39,6 @@ public class ManutentionRequestDTO {
     @Positive(message = "Next mileage must be greater than zero")
     private Double nextMileage;
 
-    private String done;
-
     @NotNull(message = "Vehicle ID is required")
-    private Long vehicleId;
+    private String vehicleId;
 }
-

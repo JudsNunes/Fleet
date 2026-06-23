@@ -1,18 +1,15 @@
 package com.evolutech.core.fleet.model.entity;
 
-
+import com.evolutech.core.fleet.model.utils.enums.VehicleStatus;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Entity
 @EntityListeners(AuditingEntityListener.class)
@@ -27,13 +24,14 @@ import java.util.List;
 )
 @Getter
 @Setter
+@NoArgsConstructor
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class VehicleEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.UUID)
     @EqualsAndHashCode.Include
-    private Long id;
+    private String id;
 
     @Column(unique = true, nullable = false, length = 10)
     @NotBlank
@@ -59,7 +57,7 @@ public class VehicleEntity {
 
     @Column(nullable = false, length = 50)
     @Enumerated(EnumType.STRING)
-    private String vehicleStatus;
+    private VehicleStatus status;
 
     @CreatedDate
     @Column(nullable = false, updatable = false)
@@ -71,7 +69,4 @@ public class VehicleEntity {
 
     @Column(insertable = false)
     private LocalDateTime deletedAt;
-
-    @OneToMany(mappedBy = "vehicle", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    private List<ManutentionEntity> maintenances;
 }

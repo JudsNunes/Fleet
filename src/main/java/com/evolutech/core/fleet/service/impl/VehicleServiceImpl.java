@@ -1,13 +1,15 @@
 package com.evolutech.core.fleet.service.impl;
 
+import com.evolutech.core.fleet.exception.BusinessException;
+import com.evolutech.core.fleet.exception.ConflictException;
+import com.evolutech.core.fleet.exception.NotFoundException;
+import com.evolutech.core.fleet.mapper.VehicleMapper;
 import com.evolutech.core.fleet.model.dto.request.VehicleRequestDTO;
 import com.evolutech.core.fleet.model.dto.response.VehicleResponseDTO;
-import com.evolutech.core.fleet.exception.BusinessException;
-import com.evolutech.core.fleet.mapper.VehicleMapper;
 import com.evolutech.core.fleet.model.entity.VehicleEntity;
+import com.evolutech.core.fleet.model.utils.enums.VehicleStatus;
 import com.evolutech.core.fleet.repository.VehicleRepository;
 import com.evolutech.core.fleet.service.VehicleService;
-import com.evolutech.fleet.api.model.VehicleDTO;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -31,84 +33,95 @@ public class VehicleServiceImpl implements VehicleService {
 
     @Override
     @Transactional
-    public Optional<VehicleDTO> findById(Long id) {
-        log.info("Starting findVehicleById with id: {}", id);
-        return vehicleRepository.findById(id)
-                .map(vehicleMapper::toVehicleDTO);
+    public Optional<VehicleResponseDTO> findById(String id) {
+        log.info("Finding vehicle by id: {}", id);
+        return vehicleRepository.findById(id).map(vehicleMapper::toResponseDTO);
     }
 
     @Override
     @Transactional
-    public VehicleDTO save(VehicleRequestDTO body) {
-        log.info("Starting saveByEntity with body: {}", body);
+    public VehicleResponseDTO save(VehicleRequestDTO body) {
+        log.info("Saving vehicle with plate: {}", body.getPlate());
+
         if (body == null) {
-            log.error("body is null");
-            throw new BusinessException("body cannot be null");
+            throw new BusinessException("Body cannot be null");
         }
+
+        vehicleRepository.findByPlateAndNotDeleted(body.getPlate())
+                .ifPresent(existing -> {throw new ConflictException("Vehicle with plate " + body.getPlate() + " already exists");});
+
         var vehicleEntity = vehicleMapper.toEntity(body);
+        vehicleEntity.setStatus(VehicleStatus.ACTIVE);
         var savedVehicle = vehicleRepository.save(vehicleEntity);
-        log.debug("Finished Mapping vehicle entity saved and createdAt: {}", LocalDateTime.now());
-        log.debug("Vehicle saved: {}", savedVehicle);
-        return vehicleMapper.toVehicleDTO(savedVehicle);
+        return vehicleMapper.toResponseDTO(savedVehicle);
     }
 
     @Override
     @Transactional
-    public VehicleDTO update(VehicleRequestDTO body) {
-        log.info("Starting updateByEntity with body: {}", body);
+    public VehicleResponseDTO update(String id, VehicleRequestDTO body) {
+        log.info("Updating vehicle with id: {}", id);
+
         if (body == null) {
-            log.error("body is null");
-            throw new BusinessException("body cannot be null");
+            throw new BusinessException("Body cannot be null");
         }
-        var vehicleEntity = vehicleMapper.toEntity(body);
-        var updatedVehicle = vehicleRepository.save(vehicleEntity);
-        log.debug("Finished Mapping vehicle entity updated and updatedAt: {}", LocalDateTime.now());
-        log.debug("Vehicle updated: {}", updatedVehicle);
-        return vehicleMapper.toVehicleDTO(updatedVehicle);
+
+        var existingVehicle = vehicleRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Vehicle not found with id: " + id));
+
+        existingVehicle.setPlate(body.getPlate());
+        existingVehicle.setModel(body.getModel());
+        existingVehicle.setBrand(body.getBrand());
+        existingVehicle.setYear(body.getYear());
+        existingVehicle.setColor(body.getColor());
+        existingVehicle.setMileage(body.getMileage());
+
+        var updatedVehicle = vehicleRepository.save(existingVehicle);
+        return vehicleMapper.toResponseDTO(updatedVehicle);
     }
 
     @Override
     @Transactional
-    public void delete(Long id) {
-        log.info("Starting soft-delete process for vehicle id: {}", id);
+    public VehicleResponseDTO updateStatus(String id, VehicleStatus status) {
+        log.info("Updating status for vehicle id: {} to {}", id, status);
 
-        if (id == null) {
-            log.error("Delete failed: ID is null");
-            throw new BusinessException("ID cannot be null");
-        }
+        var existingVehicle = vehicleRepository.findById(id).orElseThrow(() -> new NotFoundException("Vehicle not found with id: " + id));
 
-        var vehicle = vehicleRepository.findById(id).orElseThrow(() -> {
-            log.warn("Delete failed: Vehicle id: {} not found", id);
-            return new BusinessException("Vehicle not found with id: " + id);
-        });
+        existingVehicle.setStatus(status);
+        var updatedVehicle = vehicleRepository.save(existingVehicle);
+        return vehicleMapper.toResponseDTO(updatedVehicle);
+    }
+
+    @Override
+    @Transactional
+    public void delete(String id) {
+        log.info("Soft-deleting vehicle id: {}", id);
+
+        var vehicle = vehicleRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Vehicle not found with id: " + id));
 
         vehicle.setDeletedAt(LocalDateTime.now());
         vehicleRepository.save(vehicle);
-        log.debug("Vehicle id:{} successfully soft-deleted", id);
     }
 
     @Override
     @Transactional
-    public Optional<VehicleDTO> findByPlate(VehicleRequestDTO body) {
-        log.info("Starting findByPlate with plate: {}", (body != null) ? body.getPlate() : "null");
-
-        if (body == null || body.getPlate() == null) {
-            log.warn("Search attempt with null body or plate");
-            return Optional.empty();
-        }
-
-        return vehicleRepository.findByPlateAndNotDeleted(body.getPlate())
-                .map(vehicleMapper::toVehicleDTO);
-    }
-
-    @Override
-    @Transactional
-    public List<VehicleDTO> findAll() {
-        log.info("Starting findAll vehicles with default pagination");
-        Pageable pageable = PageRequest.of(0, 100, Sort.by("id").ascending());
+    public List<VehicleResponseDTO> findAll() {
+        log.info("Finding all vehicles");
+        Pageable pageable = PageRequest.of(0, 100, Sort.by("plate").ascending());
         return findAllPaged(pageable).getContent();
     }
 
+    @Override
+    @Transactional
+    public Page<VehicleResponseDTO> findAllPaged(Pageable pageable) {
+        log.info("Finding all vehicles paged: page={}, size={}", pageable.getPageNumber(), pageable.getPageSize());
+        return vehicleRepository.findAllActive(pageable).map(vehicleMapper::toResponseDTO);
+    }
 
+    @Override
+    @Transactional
+    public Page<VehicleResponseDTO> findByFilters(String plate, String brand, VehicleStatus status, Pageable pageable) {
+        log.info("Finding vehicles with filters - plate: {}, brand: {}, status: {}", plate, brand, status);
+        return vehicleRepository.findByFilters(plate, brand, status, pageable).map(vehicleMapper::toResponseDTO);
+    }
 }
-

@@ -1,7 +1,7 @@
 package com.evolutech.core.fleet.model.entity;
 
-import com.evolutech.core.fleet.model.utils.enums.ManutentionDoneStatus;
-import com.evolutech.core.fleet.model.utils.enums.typeCost;
+import com.evolutech.core.fleet.model.utils.enums.MaintenanceStatus;
+import com.evolutech.core.fleet.model.utils.enums.MaintenanceType;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -17,31 +17,31 @@ import java.time.LocalDateTime;
 @Entity
 @EntityListeners(AuditingEntityListener.class)
 @Table(
-    name = "manutention",
+    name = "maintenance",
     indexes = {
         @Index(name = "idx_vehicle_id", columnList = "vehicle_id"),
-        @Index(name = "idx_manutention_date", columnList = "manutention_date"),
-        @Index(name = "idx_done_status", columnList = "done"),
-        @Index(name = "idx_vehicle_id_done", columnList = "vehicle_id,done"),
+        @Index(name = "idx_maintenance_date", columnList = "maintenance_date"),
+        @Index(name = "idx_done_status", columnList = "status"),
+        @Index(name = "idx_vehicle_id_done", columnList = "vehicle_id,status"),
         @Index(name = "idx_created_at", columnList = "created_at"),
         @Index(name = "idx_deleted_at", columnList = "deleted_at")
     }
 )
 @Getter
 @Setter
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-public class ManutentionEntity {
+public class MaintenanceEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.UUID)
     @EqualsAndHashCode.Include
-    private Long id;
+    private String id;
 
     @NotNull
     @Column(nullable = false)
-    private LocalDate manutentionDate;
+    private LocalDate maintenanceDate;
 
     @NotBlank
     @Column(nullable = false, columnDefinition = "TEXT")
@@ -49,7 +49,7 @@ public class ManutentionEntity {
 
     @Column(nullable = false, length = 50)
     @Enumerated(EnumType.STRING)
-    private typeCost type;
+    private MaintenanceType type;
 
     @Positive
     @Column(nullable = false)
@@ -65,10 +65,10 @@ public class ManutentionEntity {
 
     @Column(nullable = false, length = 50)
     @Enumerated(EnumType.STRING)
-    private ManutentionDoneStatus done = ManutentionDoneStatus.PENDING;
+    private MaintenanceStatus maintenanceStatus;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "vehicle_id")
+    @JoinColumn(name = "vehicle_id", nullable = false)
     private VehicleEntity vehicle;
 
     @CreatedDate

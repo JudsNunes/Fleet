@@ -12,20 +12,30 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
-public interface VehicleRepository extends JpaRepository<VehicleEntity, Long> {
+public interface VehicleRepository extends JpaRepository<VehicleEntity, String> {
 
     Optional<VehicleEntity> findByPlate(String plate);
 
     @Query("SELECT v FROM VehicleEntity v WHERE v.deletedAt IS NULL AND v.plate = :plate")
     Optional<VehicleEntity> findByPlateAndNotDeleted(@Param("plate") String plate);
 
-    @Query("SELECT v FROM VehicleEntity v WHERE v.deletedAt IS NULL ORDER BY v.createdAt DESC")
+    @Query("SELECT v FROM VehicleEntity v WHERE v.deletedAt IS NULL ORDER BY v.plate ASC")
     Page<VehicleEntity> findAllActive(Pageable pageable);
 
-    @Query("SELECT v FROM VehicleEntity v WHERE v.deletedAt IS NULL AND v.status = :status ORDER BY v.createdAt DESC")
+    @Query("SELECT v FROM VehicleEntity v WHERE v.deletedAt IS NULL AND v.status = :status ORDER BY v.plate ASC")
     Page<VehicleEntity> findByStatusAndNotDeleted(@Param("status") VehicleStatus status, Pageable pageable);
+
+    @Query("SELECT v FROM VehicleEntity v WHERE v.deletedAt IS NULL " +
+           "AND (:plate IS NULL OR v.plate LIKE CONCAT('%', :plate, '%')) " +
+           "AND (:brand IS NULL OR v.brand LIKE CONCAT('%', :brand, '%')) " +
+           "AND (:status IS NULL OR v.status = :status) " +
+           "ORDER BY v.plate ASC")
+    Page<VehicleEntity> findByFilters(
+            @Param("plate") String plate,
+            @Param("brand") String brand,
+            @Param("status") VehicleStatus status,
+            Pageable pageable);
 
     @Query("SELECT v FROM VehicleEntity v WHERE v.deletedAt IS NULL")
     long countActive();
-
 }
