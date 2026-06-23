@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>com.evolutech</groupId>
 	<artifactId>fleet</artifactId>
-	<version>1.0.3-SNAPSHOT</version>
+	<version>1.1.0-SNAPSHOT</version>
 	<name>fleet</name>
 	<description>MVP for fleet management</description>
 
