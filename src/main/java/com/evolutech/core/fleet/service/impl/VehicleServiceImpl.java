@@ -7,6 +7,7 @@ import com.evolutech.core.fleet.mapper.VehicleMapper;
 import com.evolutech.core.fleet.model.dto.request.VehicleRequestDTO;
 import com.evolutech.core.fleet.model.dto.response.VehicleResponseDTO;
 import com.evolutech.core.fleet.model.entity.VehicleEntity;
+import com.evolutech.core.fleet.model.utils.enums.FuelType;
 import com.evolutech.core.fleet.model.utils.enums.VehicleStatus;
 import com.evolutech.core.fleet.repository.VehicleRepository;
 import com.evolutech.core.fleet.service.VehicleService;
@@ -50,6 +51,12 @@ public class VehicleServiceImpl implements VehicleService {
         vehicleRepository.findByPlateAndNotDeleted(body.getPlate())
                 .ifPresent(existing -> {throw new ConflictException("Vehicle with plate " + body.getPlate() + " already exists");});
 
+        vehicleRepository.findByChassisAndNotDeleted(body.getChassis())
+                .ifPresent(existing -> {throw new ConflictException("Vehicle with chassis " + body.getChassis() + " already exists");});
+
+        vehicleRepository.findByRenavamAndNotDeleted(body.getRenavam())
+                .ifPresent(existing -> {throw new ConflictException("Vehicle with renavam " + body.getRenavam() + " already exists");});
+
         var vehicleEntity = vehicleMapper.toEntity(body);
         vehicleEntity.setStatus(VehicleStatus.ACTIVE);
         var savedVehicle = vehicleRepository.save(vehicleEntity);
@@ -74,6 +81,12 @@ public class VehicleServiceImpl implements VehicleService {
         existingVehicle.setYear(body.getYear());
         existingVehicle.setColor(body.getColor());
         existingVehicle.setMileage(body.getMileage());
+        existingVehicle.setChassis(body.getChassis());
+        existingVehicle.setRenavam(body.getRenavam());
+        existingVehicle.setFuelType(FuelType.valueOf(body.getFuelType()));
+        existingVehicle.setCargoCapacityKg(body.getCargoCapacityKg());
+        existingVehicle.setPassengerCapacity(body.getPassengerCapacity());
+        existingVehicle.setEngineType(body.getEngineType());
 
         var updatedVehicle = vehicleRepository.save(existingVehicle);
         return vehicleMapper.toResponseDTO(updatedVehicle);
