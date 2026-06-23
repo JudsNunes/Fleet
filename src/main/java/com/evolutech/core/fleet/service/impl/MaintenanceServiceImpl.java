@@ -7,6 +7,7 @@ import com.evolutech.core.fleet.exception.NotFoundException;
 import com.evolutech.core.fleet.mapper.MaintenanceMapper;
 import com.evolutech.core.fleet.model.entity.MaintenanceEntity;
 import com.evolutech.core.fleet.model.entity.VehicleEntity;
+import com.evolutech.core.fleet.model.utils.enums.FuelType;
 import com.evolutech.core.fleet.model.utils.enums.MaintenanceStatus;
 import com.evolutech.core.fleet.repository.MaintenanceRepository;
 import com.evolutech.core.fleet.repository.VehicleRepository;
@@ -21,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -45,11 +47,78 @@ public class MaintenanceServiceImpl implements MaintenanceService {
                 .findById(request.getVehicleId())
                 .orElseThrow(() -> new NotFoundException("Vehicle not found with id: " + request.getVehicleId()));
 
+        if (request.getType() != null && request.getType().equals("FUEL")) {
+            validateFuelType(vehicle, request.getInvoiceFuelType());
+        }
+
         MaintenanceEntity entity = maintenanceMapper.toEntity(request, vehicle);
         entity.setMaintenanceStatus(MaintenanceStatus.PENDING);
+
+        if (request.getType() != null && request.getType().equals("FUEL")
+                && request.getLitersFilled() != null && request.getDistanceTraveled() != null) {
+            boolean isAnomalous = checkAnomalousConsumption(vehicle, request.getLitersFilled(), request.getDistanceTraveled());
+            entity.setAnomalousConsumption(isAnomalous);
+        }
+
         MaintenanceEntity savedEntity = maintenanceRepository.save(entity);
         log.info("Maintenance record created with id: {}", savedEntity.getId());
         return maintenanceMapper.toResponseDTO(savedEntity);
+    }
+
+    private void validateFuelType(VehicleEntity vehicle, String invoiceFuelType) {
+        if (invoiceFuelType == null || invoiceFuelType.isBlank()) {
+            return;
+        }
+
+        FuelType vehicleFuelType = vehicle.getFuelType();
+        FuelType invoiceFuel = FuelType.valueOf(invoiceFuelType);
+
+        if (vehicleFuelType == FuelType.ELECTRIC && invoiceFuel != FuelType.ELECTRIC) {
+            throw new BusinessException("Electric vehicle cannot use " + invoiceFuelType);
+        }
+
+        if (vehicleFuelType == FuelType.HYBRID && invoiceFuel != FuelType.HYBRID && invoiceFuel != FuelType.GASOLINE && invoiceFuel != FuelType.ETHANOL) {
+            throw new BusinessException("Hybrid vehicle can only use HYBRID, GASOLINE or ETHANOL");
+        }
+
+        if (vehicleFuelType == FuelType.GASOLINE && invoiceFuel != FuelType.GASOLINE) {
+            throw new BusinessException("Gasoline vehicle cannot use " + invoiceFuelType);
+        }
+
+        if (vehicleFuelType == FuelType.DIESEL && invoiceFuel != FuelType.DIESEL) {
+            throw new BusinessException("Diesel vehicle cannot use " + invoiceFuelType);
+        }
+
+        if (vehicleFuelType == FuelType.ETHANOL && invoiceFuel != FuelType.ETHANOL) {
+            throw new BusinessException("Ethanol vehicle cannot use " + invoiceFuelType);
+        }
+
+        if (vehicleFuelType == FuelType.FLEX && invoiceFuel != FuelType.GASOLINE && invoiceFuel != FuelType.ETHANOL) {
+            throw new BusinessException("Flex vehicle can only use GASOLINE or ETHANOL");
+        }
+    }
+
+    private boolean checkAnomalousConsumption(VehicleEntity vehicle, double litersFilled, double distanceTraveled) {
+        if (distanceTraveled <= 0) {
+            return false;
+        }
+
+        double currentConsumption = litersFilled / distanceTraveled;
+
+        List<MaintenanceEntity> recentFuelRecords = maintenanceRepository
+                .findTop10ByVehicleIdAndTypeOrderByMaintenanceDateDesc(vehicle.getId(), com.evolutech.core.fleet.model.utils.enums.MaintenanceType.FUEL);
+
+        if (recentFuelRecords.size() < 3) {
+            return false;
+        }
+
+        double averageConsumption = recentFuelRecords.stream()
+                .filter(m -> m.getLitersFilled() != null && m.getDistanceTraveled() != null && m.getDistanceTraveled() > 0)
+                .mapToDouble(m -> m.getLitersFilled() / m.getDistanceTraveled())
+                .average()
+                .orElse(currentConsumption);
+
+        return currentConsumption < averageConsumption * 0.8;
     }
 
     @Override
