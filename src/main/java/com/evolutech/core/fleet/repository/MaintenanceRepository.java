@@ -10,6 +10,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Repository
 public interface MaintenanceRepository extends JpaRepository<MaintenanceEntity, String> {
@@ -22,6 +23,11 @@ public interface MaintenanceRepository extends JpaRepository<MaintenanceEntity, 
 
     @Query("SELECT m FROM MaintenanceEntity m WHERE m.deletedAt IS NULL AND m.vehicle.id = :vehicleId AND m.maintenanceStatus = :status ORDER BY m.maintenanceDate DESC")
     Page<MaintenanceEntity> findByVehicleIdAndStatusAndNotDeleted(@Param("vehicleId") String vehicleId, @Param("status") MaintenanceStatus status, Pageable pageable);
+
+    @Query("SELECT m FROM MaintenanceEntity m WHERE m.deletedAt IS NULL AND m.vehicle.id = :vehicleId AND m.maintenanceStatus != :status ORDER BY m.maintenanceDate DESC")
+    List<MaintenanceEntity> findByVehicleIdAndMaintenanceStatusNotDeleted(@Param("vehicleId") String vehicleId, @Param("status") MaintenanceStatus status);
+
+    List<MaintenanceEntity> findTop10ByVehicleIdAndTypeOrderByMaintenanceDateDesc(@Param("vehicleId") String vehicleId, com.evolutech.core.fleet.model.utils.enums.MaintenanceType type);
 
     @Query("SELECT m FROM MaintenanceEntity m WHERE m.deletedAt IS NULL AND m.vehicle.id = :vehicleId AND m.maintenanceDate BETWEEN :startDate AND :endDate ORDER BY m.maintenanceDate DESC")
     Page<MaintenanceEntity> findByVehicleIdAndDateRangeAndNotDeleted(@Param("vehicleId") String vehicleId, @Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate, Pageable pageable);
