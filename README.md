@@ -3,7 +3,7 @@
 Bem-vindo ao repositório oficial da **Plataforma de Gestão de Frota Veicular - Fleet Evolutech**.
 
 ## 📖 A História do Projeto
-A Jornada Fleet Evolutech representa a evolução arquitetural de uma plataforma de gestão de frotas. Nascido como um MVP (Produto Mínimo Viável) monolítico, o sistema atingiu um ponto de maturidade em que exigia maior escalabilidade, resiliência e independência de times. 
+A Jornada Fleet Evolutech representa a evolução arquitetural de uma plataforma de gestão de frotas. Nascido como um MVP (Produto Mínimo Viável), o sistema atingiu um ponto de maturidade em que exigia maior escalabilidade, resiliência e independência de times. 
 
 O objetivo deste projeto é realizar a transição desse monolito para uma **Arquitetura de Microserviços** moderna, orientada a eventos, contemplando um painel web administrativo e um aplicativo mobile para os motoristas em campo.
 
