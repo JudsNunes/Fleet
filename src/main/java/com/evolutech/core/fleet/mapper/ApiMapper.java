@@ -206,4 +206,47 @@ public class ApiMapper {
         dto.setNumber(page.getNumber());
         return dto;
     }
+
+    public com.evolutech.core.fleet.model.dto.request.DriverRequestDTO toDriverRequestInternal(com.evolutech.fleet.api.model.DriverRequestDTO api) {
+        return com.evolutech.core.fleet.model.dto.request.DriverRequestDTO.builder()
+                .name(api.getName())
+                .cpf(api.getCpf())
+                .cnhNumber(api.getCnhNumber())
+                .cnhCategory(api.getCnhCategory() != null ? api.getCnhCategory().getValue() : null)
+                .cnhExpiryDate(api.getCnhExpiryDate())
+                .phone(api.getPhone())
+                .email(api.getEmail())
+                .birthDate(api.getBirthDate())
+                .address(api.getAddress())
+                .build();
+    }
+
+    public com.evolutech.fleet.api.model.DriverDTO toDriverApi(com.evolutech.core.fleet.model.dto.response.DriverResponseDTO internal) {
+        var dto = new com.evolutech.fleet.api.model.DriverDTO();
+        dto.setId(internal.getId() != null ? UUID.fromString(internal.getId()) : null);
+        dto.setName(internal.getName());
+        dto.setCpf(internal.getCpf());
+        dto.setCnhNumber(internal.getCnhNumber());
+        dto.setCnhCategory(internal.getCnhCategory() != null ? com.evolutech.fleet.api.model.DriverDTO.CnhCategoryEnum.fromValue(internal.getCnhCategory()) : null);
+        dto.setCnhExpiryDate(internal.getCnhExpiryDate());
+        dto.setCnhStatus(internal.getCnhStatus() != null ? com.evolutech.fleet.api.model.DriverDTO.CnhStatusEnum.fromValue(internal.getCnhStatus()) : null);
+        dto.setPhone(internal.getPhone());
+        dto.setEmail(internal.getEmail());
+        dto.setBirthDate(internal.getBirthDate());
+        dto.setAddress(internal.getAddress());
+        dto.setStatus(internal.getStatus() != null ? com.evolutech.fleet.api.model.DriverDTO.StatusEnum.fromValue(internal.getStatus()) : null);
+        dto.setCreatedAt(internal.getCreatedAt());
+        dto.setUpdatedAt(internal.getUpdatedAt());
+        return dto;
+    }
+
+    public com.evolutech.fleet.api.model.DriverPageDTO toDriverPageApi(Page<com.evolutech.core.fleet.model.dto.response.DriverResponseDTO> page) {
+        var dto = new com.evolutech.fleet.api.model.DriverPageDTO();
+        dto.setContent(page.getContent().stream().map(this::toDriverApi).collect(Collectors.toList()));
+        dto.setTotalElements((int) page.getTotalElements());
+        dto.setTotalPages(page.getTotalPages());
+        dto.setSize(page.getSize());
+        dto.setNumber(page.getNumber());
+        return dto;
+    }
 }

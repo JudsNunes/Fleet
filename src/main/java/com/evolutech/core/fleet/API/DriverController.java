@@ -1,93 +1,92 @@
 package com.evolutech.core.fleet.API;
 
-import com.evolutech.core.fleet.model.dto.request.DriverRequestDTO;
-import com.evolutech.core.fleet.model.dto.response.DriverResponseDTO;
-import com.evolutech.core.fleet.model.utils.enums.DriverLicenseStatus;
-import com.evolutech.core.fleet.model.utils.enums.DriverStatus;
+import com.evolutech.core.fleet.mapper.ApiMapper;
 import com.evolutech.core.fleet.service.DriverService;
-import jakarta.validation.Valid;
+import com.evolutech.fleet.api.DriversApi;
+import com.evolutech.fleet.api.model.DriverDTO;
+import com.evolutech.fleet.api.model.DriverPageDTO;
+import com.evolutech.fleet.api.model.DriverRequestDTO;
+import com.evolutech.fleet.api.model.UpdateDriverStatusRequestDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PageableDefault;
-import org.springframework.http.HttpStatus;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
-import java.util.Map;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/drivers")
 @RequiredArgsConstructor
 @Slf4j
-public class DriverController {
+public class DriverController implements DriversApi {
 
     private final DriverService driverService;
+    private final ApiMapper apiMapper;
 
-    @GetMapping("/{id}")
-    public ResponseEntity<DriverResponseDTO> getDriverById(@PathVariable String id) {
-        log.info("Fetching driver: {}", id);
-        return driverService.findById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    @Override
+    public ResponseEntity<DriverDTO> createDriver(DriverRequestDTO driverRequestDTO) {
+        log.info("Creating driver with CPF: {}", driverRequestDTO.getCpf());
+        var internalRequest = apiMapper.toDriverRequestInternal(driverRequestDTO);
+        var result = driverService.save(internalRequest);
+        return ResponseEntity.status(201).body(apiMapper.toDriverApi(result));
     }
 
-    @PostMapping
-    public ResponseEntity<DriverResponseDTO> createDriver(@Valid @RequestBody DriverRequestDTO body) {
-        log.info("Creating driver with CPF: {}", body.getCpf());
-        var result = driverService.save(body);
-        return ResponseEntity.status(HttpStatus.CREATED).body(result);
-    }
-
-    @PutMapping("/{id}")
-    public ResponseEntity<DriverResponseDTO> updateDriver(@PathVariable String id, @Valid @RequestBody DriverRequestDTO body) {
-        log.info("Updating driver: {}", id);
-        var result = driverService.update(id, body);
-        return ResponseEntity.ok(result);
-    }
-
-    @PatchMapping("/{id}/status")
-    public ResponseEntity<DriverResponseDTO> updateDriverStatus(@PathVariable String id, @RequestBody Map<String, DriverStatus> statusRequest) {
-        log.info("Updating status for driver: {}", id);
-        var result = driverService.updateStatus(id, statusRequest.get("status"));
-        return ResponseEntity.ok(result);
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteDriver(@PathVariable String id) {
+    @Override
+    public ResponseEntity<Void> deleteDriver(UUID id) {
         log.info("Deleting driver: {}", id);
-        driverService.delete(id);
+        driverService.delete(id.toString());
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping
-    public ResponseEntity<Page<DriverResponseDTO>> getAllDrivers(
-            @RequestParam(required = false) String name,
-            @RequestParam(required = false) String cpf,
-            @RequestParam(required = false) DriverStatus status,
-            @RequestParam(required = false) DriverLicenseStatus cnhStatus,
-            @PageableDefault(size = 20, page = 0) Pageable pageable) {
-        log.info("Fetching drivers - name: {}, cpf: {}, status: {}, cnhStatus: {}", name, cpf, status, cnhStatus);
-        if (name != null || cpf != null || status != null || cnhStatus != null) {
-            return ResponseEntity.ok(driverService.findByFilters(name, cpf, status, cnhStatus, pageable));
-        }
-        return ResponseEntity.ok(driverService.findAllPaged(pageable));
+    @Override
+    public ResponseEntity<DriverPageDTO> getAllDrivers(String name, String cpf, String status, String cnhStatus, Integer page, Integer size) {
+        log.info("Fetching drivers - page: {}, size: {}", page, size);
+        var pageable = PageRequest.of(page, size);
+        var drivers = driverService.findByFilters(name, cpf,
+                status != null ? com.evolutech.core.fleet.model.utils.enums.DriverStatus.valueOf(status) : null,
+                cnhStatus != null ? com.evolutech.core.fleet.model.utils.enums.DriverLicenseStatus.valueOf(cnhStatus) : null,
+                pageable);
+        return ResponseEntity.ok(apiMapper.toDriverPageApi(drivers));
     }
 
-    @GetMapping("/cpf/{cpf}")
-    public ResponseEntity<DriverResponseDTO> getDriverByCpf(@PathVariable String cpf) {
-        log.info("Fetching driver by CPF: {}", cpf);
-        return driverService.findByCpf(cpf)
-                .map(ResponseEntity::ok)
+    @Override
+    public ResponseEntity<DriverDTO> getDriverById(UUID id) {
+        log.info("Fetching driver: {}", id);
+        return driverService.findById(id.toString())
+                .map(d -> ResponseEntity.ok(apiMapper.toDriverApi(d)))
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @GetMapping("/expiring-cnhs")
-    public ResponseEntity<List<DriverResponseDTO>> getExpiringCnhs(
-            @RequestParam(defaultValue = "30") int days) {
+    @Override
+    public ResponseEntity<DriverDTO> getDriverByCpf(String cpf) {
+        log.info("Fetching driver by CPF: {}", cpf);
+        return driverService.findByCpf(cpf)
+                .map(d -> ResponseEntity.ok(apiMapper.toDriverApi(d)))
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @Override
+    public ResponseEntity<List<DriverDTO>> getExpiringCnhs(Integer days) {
         log.info("Fetching drivers with CNH expiring in {} days", days);
-        return ResponseEntity.ok(driverService.findExpiringCnhs(days));
+        var result = driverService.findExpiringCnhs(days != null ? days : 30);
+        return ResponseEntity.ok(result.stream().map(apiMapper::toDriverApi).collect(Collectors.toList()));
+    }
+
+    @Override
+    public ResponseEntity<Void> updateDriver(UUID id, DriverRequestDTO driverRequestDTO) {
+        log.info("Updating driver: {}", id);
+        var internalRequest = apiMapper.toDriverRequestInternal(driverRequestDTO);
+        driverService.update(id.toString(), internalRequest);
+        return ResponseEntity.ok().build();
+    }
+
+    @Override
+    public ResponseEntity<Void> updateDriverStatus(UUID id, UpdateDriverStatusRequestDTO updateDriverStatusRequestDTO) {
+        log.info("Updating status for driver: {}", id);
+        var status = com.evolutech.core.fleet.model.utils.enums.DriverStatus.valueOf(updateDriverStatusRequestDTO.getStatus().getValue());
+        driverService.updateStatus(id.toString(), status);
+        return ResponseEntity.ok().build();
     }
 }
