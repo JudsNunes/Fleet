@@ -1,0 +1,253 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net" modified="2026-06-23T22:00:00.000Z" agent="5.0" etag="" version="21.0.0" type="device">
+  <diagram id="fleet-architecture" name="Fleet Architecture">
+    <mxGraphModel dx="1422" dy="762" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="900" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+
+        <!-- Title -->
+        <mxCell id="title" value="Fleet Management System - Core Architecture" style="text;html=1;fontSize=20;fontStyle=1;align=center;" vertex="1" parent="1">
+          <mxGeometry x="400" y="20" width="400" height="40" as="geometry"/>
+        </mxCell>
+
+        <!-- External Clients -->
+        <mxCell id="web-admin" value="Web Admin&#xa;(React)" style="shape=ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="100" y="120" width="120" height="80" as="geometry"/>
+        </mxCell>
+        <mxCell id="mobile-app" value="Mobile App&#xa;(React Native)" style="shape=ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="300" y="120" width="120" height="80" as="geometry"/>
+        </mxCell>
+
+        <!-- BFF Layer -->
+        <mxCell id="bff" value="Fleet BFF&#xa;(Spring Boot)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=14;fontStyle=1;arcSize=20;" vertex="1" parent="1">
+          <mxGeometry x="150" y="280" width="200" height="80" as="geometry"/>
+        </mxCell>
+
+        <!-- Connection: Clients to BFF -->
+        <mxCell id="e1" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#6c8ebf;strokeWidth=2;" edge="1" parent="1" source="web-admin" target="bff">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e2" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#6c8ebf;strokeWidth=2;" edge="1" parent="1" source="mobile-app" target="bff">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- Fleet Core Box -->
+        <mxCell id="core-box" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;strokeWidth=2;dashed=1;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="500" y="80" width="700" height="580" as="geometry"/>
+        </mxCell>
+        <mxCell id="core-label" value="Fleet Core (Spring Boot)" style="text;html=1;fontSize=16;fontStyle=1;align=left;" vertex="1" parent="1">
+          <mxGeometry x="520" y="90" width="300" height="30" as="geometry"/>
+        </mxCell>
+
+        <!-- API Layer -->
+        <mxCell id="api-layer" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;strokeWidth=1;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="520" y="130" width="660" height="100" as="geometry"/>
+        </mxCell>
+        <mxCell id="api-label" value="REST API Layer" style="text;html=1;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="530" y="135" width="120" height="20" as="geometry"/>
+        </mxCell>
+
+        <!-- Controllers -->
+        <mxCell id="vehicle-ctrl" value="VehicleController&#xa;implements VehiclesApi" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="530" y="160" width="140" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="maintenance-ctrl" value="MaintenanceController&#xa;implements MaintenancesApi" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="680" y="160" width="150" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="service-order-ctrl" value="ServiceOrderController&#xa;implements ServiceOrdersApi" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="840" y="160" width="150" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="driver-ctrl" value="DriverController&#xa;implements DriversApi" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="1000" y="160" width="140" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="fine-ctrl" value="FineController" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="530" y="220" width="100" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="audit-ctrl" value="AuditLogController" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="640" y="220" width="120" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="trip-ctrl" value="TripController" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="770" y="220" width="100" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="assignment-ctrl" value="VehicleAssignment&#xa;Controller" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="880" y="220" width="120" height="40" as="geometry"/>
+        </mxCell>
+
+        <!-- Connection: BFF to API -->
+        <mxCell id="e3" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#9673a6;strokeWidth=2;" edge="1" parent="1" source="bff" target="api-layer">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- Service Layer -->
+        <mxCell id="service-layer" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=1;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="520" y="260" width="660" height="80" as="geometry"/>
+        </mxCell>
+        <mxCell id="service-label" value="Service Layer" style="text;html=1;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="530" y="265" width="120" height="20" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="vehicle-svc" value="VehicleService" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="530" y="290" width="100" height="35" as="geometry"/>
+        </mxCell>
+        <mxCell id="maintenance-svc" value="MaintenanceService" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="640" y="290" width="120" height="35" as="geometry"/>
+        </mxCell>
+        <mxCell id="service-order-svc" value="ServiceOrderService" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="770" y="290" width="120" height="35" as="geometry"/>
+        </mxCell>
+        <mxCell id="driver-svc" value="DriverService" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="900" y="290" width="100" height="35" as="geometry"/>
+        </mxCell>
+        <mxCell id="fine-svc" value="FineService" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="530" y="330" width="100" height="30" as="geometry"/>
+        </mxCell>
+        <mxCell id="audit-svc" value="AuditLogService" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="640" y="330" width="120" height="30" as="geometry"/>
+        </mxCell>
+        <mxCell id="trip-svc" value="TripService" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="770" y="330" width="100" height="30" as="geometry"/>
+        </mxCell>
+        <mxCell id="assignment-svc" value="VehicleAssignment&#xa;Service" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="880" y="330" width="120" height="30" as="geometry"/>
+        </mxCell>
+
+        <!-- Repository Layer -->
+        <mxCell id="repo-layer" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;strokeWidth=1;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="520" y="370" width="660" height="80" as="geometry"/>
+        </mxCell>
+        <mxCell id="repo-label" value="Repository Layer (Spring Data JPA)" style="text;html=1;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="530" y="375" width="250" height="20" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="vehicle-repo" value="VehicleRepository" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="530" y="400" width="110" height="35" as="geometry"/>
+        </mxCell>
+        <mxCell id="maintenance-repo" value="MaintenanceRepository" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="650" y="400" width="130" height="35" as="geometry"/>
+        </mxCell>
+        <mxCell id="service-order-repo" value="ServiceOrderRepository" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="790" y="400" width="130" height="35" as="geometry"/>
+        </mxCell>
+        <mxCell id="driver-repo" value="DriverRepository" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="930" y="400" width="110" height="35" as="geometry"/>
+        </mxCell>
+        <mxCell id="fine-repo" value="FineRepository" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="1050" y="400" width="110" height="35" as="geometry"/>
+        </mxCell>
+        <mxCell id="trip-repo" value="TripRepository" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="530" y="440" width="110" height="30" as="geometry"/>
+        </mxCell>
+        <mxCell id="assignment-repo" value="VehicleAssignment&#xa;Repository" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="650" y="440" width="130" height="30" as="geometry"/>
+        </mxCell>
+        <mxCell id="audit-repo" value="AuditLogRepository" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="790" y="440" width="120" height="30" as="geometry"/>
+        </mxCell>
+        <mxCell id="alert-repo" value="MaintenanceAlert&#xa;Repository" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="920" y="440" width="120" height="30" as="geometry"/>
+        </mxCell>
+
+        <!-- Connection: API to Service -->
+        <mxCell id="e4" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#82b366;strokeWidth=1;" edge="1" parent="1" source="api-layer" target="service-layer">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- Connection: Service to Repository -->
+        <mxCell id="e5" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#b85450;strokeWidth=1;" edge="1" parent="1" source="service-layer" target="repo-layer">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- Infrastructure -->
+        <mxCell id="infra-layer" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;strokeWidth=1;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="520" y="480" width="660" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="infra-label" value="Infrastructure" style="text;html=1;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="530" y="485" width="120" height="20" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="exception-handler" value="GlobalExceptionHandler" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="530" y="510" width="140" height="25" as="geometry"/>
+        </mxCell>
+        <mxCell id="audit-listener" value="AuditEntityListener" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="680" y="510" width="120" height="25" as="geometry"/>
+        </mxCell>
+        <mxCell id="alert-scheduler" value="MaintenanceAlert&#xa;Scheduler" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="810" y="510" width="120" height="25" as="geometry"/>
+        </mxCell>
+        <mxCell id="api-mapper" value="ApiMapper" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="940" y="510" width="100" height="25" as="geometry"/>
+        </mxCell>
+
+        <!-- Database -->
+        <mxCell id="database" value="MySQL 8.0&#xa;Fleet DB" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#f8cecc;strokeColor=#b85450;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="700" y="600" width="140" height="80" as="geometry"/>
+        </mxCell>
+
+        <!-- Connection: Repository to Database -->
+        <mxCell id="e6" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#b85450;strokeWidth=2;dashed=1;" edge="1" parent="1" source="repo-layer" target="database">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- Connection: Infra to Service -->
+        <mxCell id="e7" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#d6b656;strokeWidth=1;dashed=1;" edge="1" parent="1" source="infra-layer" target="service-layer">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- Migrations -->
+        <mxCell id="migrations" value="Flyway Migrations&#xa;V1-V9" style="shape=note;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=10;align=center;" vertex="1" parent="1">
+          <mxGeometry x="900" y="600" width="120" height="60" as="geometry"/>
+        </mxCell>
+
+        <!-- OpenAPI Spec -->
+        <mxCell id="openapi" value="OpenAPI 3.0&#xa;evolutech-fleet.yaml" style="shape=note;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;align=center;" vertex="1" parent="1">
+          <mxGeometry x="520" y="600" width="150" height="60" as="geometry"/>
+        </mxCell>
+
+        <!-- Legend -->
+        <mxCell id="legend-box" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;strokeWidth=1;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="50" y="400" width="200" height="180" as="geometry"/>
+        </mxCell>
+        <mxCell id="legend-title" value="Legend" style="text;html=1;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="60" y="410" width="100" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="leg1" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="60" y="440" width="20" height="15" as="geometry"/>
+        </mxCell>
+        <mxCell id="leg1-text" value="API Layer (Contract-First)" style="text;html=1;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="85" y="438" width="150" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="leg2" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="60" y="465" width="20" height="15" as="geometry"/>
+        </mxCell>
+        <mxCell id="leg2-text" value="Service Layer (Business)" style="text;html=1;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="85" y="463" width="150" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="leg3" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="60" y="490" width="20" height="15" as="geometry"/>
+        </mxCell>
+        <mxCell id="leg3-text" value="Repository (Data Access)" style="text;html=1;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="85" y="488" width="150" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="leg4" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="60" y="515" width="20" height="15" as="geometry"/>
+        </mxCell>
+        <mxCell id="leg4-text" value="Infrastructure" style="text;html=1;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="85" y="513" width="150" height="20" as="geometry"/>
+        </mxCell>
+
+        <!-- Tech Stack -->
+        <mxCell id="tech-box" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;strokeWidth=1;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="50" y="600" width="200" height="120" as="geometry"/>
+        </mxCell>
+        <mxCell id="tech-title" value="Tech Stack" style="text;html=1;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="60" y="610" width="100" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="tech-text" value="Java 17&#xa;Spring Boot 4.0.2&#xa;MySQL 8.0&#xa;Flyway (V1-V9)&#xa;MapStruct&#xa;OpenAPI Generator&#xa;Lombok" style="text;html=1;fontSize=10;align=left;" vertex="1" parent="1">
+          <mxGeometry x="60" y="635" width="180" height="80" as="geometry"/>
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

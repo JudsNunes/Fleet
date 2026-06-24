@@ -18,12 +18,18 @@ tags:
     description: Operações com veículos
   - name: Maintenance
     description: Operações com manutenções
-  - name: ServiceOrder
-    description: Ordens de Serviço
+  - name: Driver
+    description: Gestão de motoristas
   - name: AuditLog
-    description: Logs de auditoria
+    description: Consulta de logs de auditoria
   - name: Fine
-    description: Multas de trânsito
+    description: Operações com multas
+  - name: ServiceOrder
+    description: Operações com ordens de serviço
+  - name: Trip
+    description: Gestão de viagens
+  - name: VehicleAssignment
+    description: Gestão de alocações de veículos
 
 paths:
   /vehicles:
@@ -359,13 +365,31 @@ paths:
                 items:
                   $ref: '#/components/schemas/Maintenance'
 
-  /service-orders:
+  /drivers:
     get:
       tags:
-        - ServiceOrder
-      summary: Listar todas as ordens de serviço
-      operationId: getAllServiceOrders
+        - Driver
+      summary: Listar motoristas
+      operationId: getAllDrivers
       parameters:
+        - name: name
+          in: query
+          schema:
+            type: string
+        - name: cpf
+          in: query
+          schema:
+            type: string
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [ACTIVE, INACTIVE, SUSPENDED]
+        - name: cnhStatus
+          in: query
+          schema:
+            type: string
+            enum: [ACTIVE, EXPIRED, SUSPENDED]
         - name: page
           in: query
           schema:
@@ -378,40 +402,40 @@ paths:
             default: 20
       responses:
         '200':
-          description: Lista de ordens de serviço
+          description: Lista de motoristas
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ServiceOrderPage'
+                $ref: '#/components/schemas/DriverPage'
     post:
       tags:
-        - ServiceOrder
-      summary: Criar uma nova ordem de serviço
-      operationId: createServiceOrder
+        - Driver
+      summary: Criar motorista
+      operationId: createDriver
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ServiceOrderRequest'
+              $ref: '#/components/schemas/DriverRequest'
       responses:
         '201':
-          description: Ordem de serviço criada
+          description: Motorista criado
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ServiceOrder'
+                $ref: '#/components/schemas/Driver'
         '400':
           description: Dados inválidos
-        '404':
-          description: Veículo não encontrado
+        '409':
+          description: CPF ou CNH duplicada
 
-  /service-orders/{id}:
+  /drivers/{id}:
     get:
       tags:
-        - ServiceOrder
-      summary: Buscar ordem de serviço por ID
-      operationId: getServiceOrderById
+        - Driver
+      summary: Buscar motorista por UUID
+      operationId: getDriverById
       parameters:
         - name: id
           in: path
@@ -421,18 +445,18 @@ paths:
             format: uuid
       responses:
         '200':
-          description: Ordem de serviço encontrada
+          description: Motorista encontrado
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ServiceOrder'
+                $ref: '#/components/schemas/Driver'
         '404':
-          description: Ordem de serviço não encontrada
+          description: Motorista não encontrado
     put:
       tags:
-        - ServiceOrder
-      summary: Atualizar uma ordem de serviço
-      operationId: updateServiceOrder
+        - Driver
+      summary: Atualizar motorista
+      operationId: updateDriver
       parameters:
         - name: id
           in: path
@@ -445,17 +469,17 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ServiceOrderRequest'
+              $ref: '#/components/schemas/DriverRequest'
       responses:
         '200':
-          description: Ordem de serviço atualizada
+          description: Motorista atualizado
         '404':
-          description: Ordem de serviço não encontrada
+          description: Motorista não encontrado
     delete:
       tags:
-        - ServiceOrder
-      summary: Deletar uma ordem de serviço (soft-delete)
-      operationId: deleteServiceOrder
+        - Driver
+      summary: Deletar motorista (soft-delete)
+      operationId: deleteDriver
       parameters:
         - name: id
           in: path
@@ -465,16 +489,16 @@ paths:
             format: uuid
       responses:
         '204':
-          description: Ordem de serviço deletada
+          description: Motorista deletado
         '404':
-          description: Ordem de serviço não encontrada
+          description: Motorista não encontrado
 
-  /service-orders/{id}/approve:
+  /drivers/{id}/status:
     patch:
       tags:
-        - ServiceOrder
-      summary: Aprovar ordem de serviço
-      operationId: approveServiceOrder
+        - Driver
+      summary: Atualizar status do motorista
+      operationId: updateDriverStatus
       parameters:
         - name: id
           in: path
@@ -487,159 +511,60 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ServiceOrderApproval'
+              type: object
+              properties:
+                status:
+                  type: string
+                  enum: [ACTIVE, INACTIVE, SUSPENDED]
       responses:
         '200':
-          description: Ordem de serviço aprovada
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ServiceOrder'
-        '400':
-          description: Status inválido para aprovação
+          description: Status atualizado
         '404':
-          description: Ordem de serviço não encontrada
+          description: Motorista não encontrado
 
-  /service-orders/{id}/reject:
-    patch:
-      tags:
-        - ServiceOrder
-      summary: Rejeitar ordem de serviço
-      operationId: rejectServiceOrder
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ServiceOrderApproval'
-      responses:
-        '200':
-          description: Ordem de serviço rejeitada
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ServiceOrder'
-        '400':
-          description: Status inválido para rejeição
-        '404':
-          description: Ordem de serviço não encontrada
-
-  /service-orders/{id}/complete:
-    patch:
-      tags:
-        - ServiceOrder
-      summary: Completar ordem de serviço
-      operationId: completeServiceOrder
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-      responses:
-        '200':
-          description: Ordem de serviço completada
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ServiceOrder'
-        '400':
-          description: Status inválido para completar
-        '404':
-          description: Ordem de serviço não encontrada
-
-  /service-orders/vehicle/{vehicleId}:
+  /drivers/cpf/{cpf}:
     get:
       tags:
-        - ServiceOrder
-      summary: Listar ordens de serviço por veículo
-      operationId: getServiceOrdersByVehicle
+        - Driver
+      summary: Buscar motorista por CPF
+      operationId: getDriverByCpf
       parameters:
-        - name: vehicleId
+        - name: cpf
           in: path
           required: true
           schema:
             type: string
-            format: uuid
-        - name: page
-          in: query
-          schema:
-            type: integer
-            default: 0
-        - name: size
-          in: query
-          schema:
-            type: integer
-            default: 20
       responses:
         '200':
-          description: Ordens de serviço encontradas
+          description: Motorista encontrado
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ServiceOrderPage'
+                $ref: '#/components/schemas/Driver'
+        '404':
+          description: Motorista não encontrado
 
-  /service-orders/status/{status}:
+  /drivers/expiring-cnhs:
     get:
       tags:
-        - ServiceOrder
-      summary: Listar ordens de serviço por status
-      operationId: getServiceOrdersByStatus
+        - Driver
+      summary: Listar motoristas com CNH vencendo
+      operationId: getExpiringCnhs
       parameters:
-        - name: status
-          in: path
-          required: true
-          schema:
-            type: string
-            enum: [PENDING, APPROVED, REJECTED, COMPLETED]
-        - name: page
+        - name: days
           in: query
           schema:
             type: integer
-            default: 0
-        - name: size
-          in: query
-          schema:
-            type: integer
-            default: 20
+            default: 30
       responses:
         '200':
-          description: Ordens de serviço encontradas
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ServiceOrderPage'
-
-  /service-orders/warranty/{vehicleId}:
-    get:
-      tags:
-        - ServiceOrder
-      summary: Listar garantias ativas por veículo
-      operationId: getActiveWarranties
-      parameters:
-        - name: vehicleId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-      responses:
-        '200':
-          description: Garantias ativas encontradas
+          description: Lista de motoristas com CNH vencendo
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/ServiceOrder'
+                  $ref: '#/components/schemas/Driver'
 
   /audit-logs:
     get:
@@ -661,41 +586,6 @@ paths:
       responses:
         '200':
           description: Lista de logs de auditoria
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/AuditLogPage'
-
-  /audit-logs/entity/{entityType}/{entityId}:
-    get:
-      tags:
-        - AuditLog
-      summary: Listar logs de auditoria por entidade
-      operationId: getAuditLogsByEntity
-      parameters:
-        - name: entityType
-          in: path
-          required: true
-          schema:
-            type: string
-        - name: entityId
-          in: path
-          required: true
-          schema:
-            type: string
-        - name: page
-          in: query
-          schema:
-            type: integer
-            default: 0
-        - name: size
-          in: query
-          schema:
-            type: integer
-            default: 20
-      responses:
-        '200':
-          description: Logs de auditoria encontrados
           content:
             application/json:
               schema:
@@ -725,7 +615,43 @@ paths:
             default: 20
       responses:
         '200':
-          description: Logs de auditoria encontrados
+          description: Lista de logs de auditoria
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuditLogPage'
+
+  /audit-logs/entity/{entityType}/{entityId}:
+    get:
+      tags:
+        - AuditLog
+      summary: Listar logs de auditoria de uma entidade específica
+      operationId: getAuditLogsByEntity
+      parameters:
+        - name: entityType
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: entityId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: Lista de logs de auditoria
           content:
             application/json:
               schema:
@@ -743,6 +669,7 @@ paths:
           required: true
           schema:
             type: string
+            format: uuid
         - name: page
           in: query
           schema:
@@ -755,7 +682,7 @@ paths:
             default: 20
       responses:
         '200':
-          description: Logs de auditoria encontrados
+          description: Lista de logs de auditoria
           content:
             application/json:
               schema:
@@ -805,8 +732,10 @@ paths:
                 $ref: '#/components/schemas/Fine'
         '400':
           description: Dados inválidos
-        '404':
-          description: Veículo não encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
 
   /fines/{id}:
     get:
@@ -830,6 +759,10 @@ paths:
                 $ref: '#/components/schemas/Fine'
         '404':
           description: Multa não encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
     put:
       tags:
         - Fine
@@ -901,6 +834,37 @@ paths:
               schema:
                 $ref: '#/components/schemas/FinePage'
 
+  /fines/status/{status}:
+    get:
+      tags:
+        - Fine
+      summary: Listar multas por status
+      operationId: getFinesByStatus
+      parameters:
+        - name: status
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [PENDING, PAID, DISPUTED]
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: Multas encontradas
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FinePage'
+
   /fines/vehicle/{vehicleId}:
     get:
       tags:
@@ -932,19 +896,13 @@ paths:
               schema:
                 $ref: '#/components/schemas/FinePage'
 
-  /fines/status/{status}:
+  /service-orders:
     get:
       tags:
-        - Fine
-      summary: Listar multas por status
-      operationId: getFinesByStatus
+        - ServiceOrder
+      summary: Listar todas as ordens de serviço
+      operationId: getAllServiceOrders
       parameters:
-        - name: status
-          in: path
-          required: true
-          schema:
-            type: string
-            enum: [PENDING, PAID, DISPUTED]
         - name: page
           in: query
           schema:
@@ -957,11 +915,808 @@ paths:
             default: 20
       responses:
         '200':
-          description: Multas encontradas
+          description: Lista de ordens de serviço
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/FinePage'
+                $ref: '#/components/schemas/ServiceOrderPage'
+    post:
+      tags:
+        - ServiceOrder
+      summary: Criar uma nova ordem de serviço
+      operationId: createServiceOrder
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ServiceOrderRequest'
+      responses:
+        '201':
+          description: Ordem de serviço criada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceOrder'
+        '400':
+          description: Dados inválidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /service-orders/{id}:
+    get:
+      tags:
+        - ServiceOrder
+      summary: Buscar ordem de serviço por ID
+      operationId: getServiceOrderById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Ordem de serviço encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceOrder'
+        '404':
+          description: Ordem de serviço não encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    put:
+      tags:
+        - ServiceOrder
+      summary: Atualizar uma ordem de serviço
+      operationId: updateServiceOrder
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ServiceOrderRequest'
+      responses:
+        '200':
+          description: Ordem de serviço atualizada
+        '404':
+          description: Ordem de serviço não encontrada
+    delete:
+      tags:
+        - ServiceOrder
+      summary: Deletar uma ordem de serviço
+      operationId: deleteServiceOrder
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Ordem de serviço deletada
+        '404':
+          description: Ordem de serviço não encontrada
+
+  /service-orders/{id}/approve:
+    patch:
+      tags:
+        - ServiceOrder
+      summary: Aprovar uma ordem de serviço
+      operationId: approveServiceOrder
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ServiceOrderApproval'
+      responses:
+        '200':
+          description: Ordem de serviço aprovada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceOrder'
+
+  /service-orders/{id}/reject:
+    patch:
+      tags:
+        - ServiceOrder
+      summary: Rejeitar uma ordem de serviço
+      operationId: rejectServiceOrder
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ServiceOrderApproval'
+      responses:
+        '200':
+          description: Ordem de serviço rejeitada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceOrder'
+
+  /service-orders/{id}/complete:
+    patch:
+      tags:
+        - ServiceOrder
+      summary: Concluir uma ordem de serviço
+      operationId: completeServiceOrder
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Ordem de serviço concluída
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceOrder'
+
+  /service-orders/status/{status}:
+    get:
+      tags:
+        - ServiceOrder
+      summary: Listar ordens de serviço por status
+      operationId: getServiceOrdersByStatus
+      parameters:
+        - name: status
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [PENDING, APPROVED, REJECTED, COMPLETED]
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: Ordens de serviço encontradas
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceOrderPage'
+
+  /service-orders/vehicle/{vehicleId}:
+    get:
+      tags:
+        - ServiceOrder
+      summary: Listar ordens de serviço por veículo
+      operationId: getServiceOrdersByVehicle
+      parameters:
+        - name: vehicleId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: Ordens de serviço encontradas
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceOrderPage'
+
+  /service-orders/warranties/vehicle/{vehicleId}:
+    get:
+      tags:
+        - ServiceOrder
+      summary: Listar garantias ativas por veículo
+      operationId: getActiveWarranties
+      parameters:
+        - name: vehicleId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Garantias ativas encontradas
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ServiceOrder'
+
+  /trips:
+    get:
+      tags:
+        - Trip
+      summary: Listar todas as viagens
+      operationId: getAllTrips
+      parameters:
+        - name: vehicleId
+          in: query
+          schema:
+            type: string
+            format: uuid
+          description: Filtrar por veículo
+        - name: driverId
+          in: query
+          schema:
+            type: string
+            format: uuid
+          description: Filtrar por motorista
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [PLANNED, IN_PROGRESS, COMPLETED, CANCELLED]
+          description: Filtrar por status
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: Lista de viagens
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TripPage'
+    post:
+      tags:
+        - Trip
+      summary: Criar uma nova viagem
+      operationId: createTrip
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TripRequest'
+      responses:
+        '201':
+          description: Viagem criada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Trip'
+        '400':
+          description: Dados inválidos
+
+  /trips/{id}:
+    get:
+      tags:
+        - Trip
+      summary: Buscar viagem por ID
+      operationId: getTripById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Viagem encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Trip'
+        '404':
+          description: Viagem não encontrada
+    put:
+      tags:
+        - Trip
+      summary: Atualizar uma viagem
+      operationId: updateTrip
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TripRequest'
+      responses:
+        '200':
+          description: Viagem atualizada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Trip'
+        '404':
+          description: Viagem não encontrada
+        '400':
+          description: Dados inválidos
+    delete:
+      tags:
+        - Trip
+      summary: Deletar uma viagem
+      operationId: deleteTrip
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Viagem deletada
+        '404':
+          description: Viagem não encontrada
+
+  /trips/{id}/start:
+    patch:
+      tags:
+        - Trip
+      summary: Iniciar uma viagem
+      operationId: startTrip
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                startMileage:
+                  type: number
+                  format: double
+      responses:
+        '200':
+          description: Viagem iniciada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Trip'
+        '404':
+          description: Viagem não encontrada
+
+  /trips/{id}/complete:
+    patch:
+      tags:
+        - Trip
+      summary: Concluir uma viagem
+      operationId: completeTrip
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                endMileage:
+                  type: number
+                  format: double
+      responses:
+        '200':
+          description: Viagem concluída
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Trip'
+        '404':
+          description: Viagem não encontrada
+
+  /trips/{id}/cancel:
+    patch:
+      tags:
+        - Trip
+      summary: Cancelar uma viagem
+      operationId: cancelTrip
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Viagem cancelada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Trip'
+        '404':
+          description: Viagem não encontrada
+
+  /trips/{id}/deviation:
+    patch:
+      tags:
+        - Trip
+      summary: Registrar desvio de rota
+      operationId: registerDeviation
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                justification:
+                  type: string
+      responses:
+        '200':
+          description: Desvio registrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Trip'
+        '404':
+          description: Viagem não encontrada
+
+  /trips/vehicle/{vehicleId}:
+    get:
+      tags:
+        - Trip
+      summary: Listar viagens por veículo
+      operationId: getTripsByVehicle
+      parameters:
+        - name: vehicleId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: Viagens encontradas
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TripPage'
+
+  /trips/driver/{driverId}:
+    get:
+      tags:
+        - Trip
+      summary: Listar viagens por motorista
+      operationId: getTripsByDriver
+      parameters:
+        - name: driverId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: Viagens encontradas
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TripPage'
+
+  /assignments:
+    get:
+      tags:
+        - VehicleAssignment
+      summary: Listar todas as alocações
+      operationId: getAllAssignments
+      parameters:
+        - name: vehicleId
+          in: query
+          schema:
+            type: string
+            format: uuid
+          description: Filtrar por veículo
+        - name: driverId
+          in: query
+          schema:
+            type: string
+            format: uuid
+          description: Filtrar por motorista
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [ACTIVE, ENDED, CANCELLED]
+          description: Filtrar por status
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: Lista de alocações
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VehicleAssignmentPage'
+    post:
+      tags:
+        - VehicleAssignment
+      summary: Criar uma nova alocação
+      operationId: createAssignment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VehicleAssignmentRequest'
+      responses:
+        '201':
+          description: Alocação criada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VehicleAssignment'
+        '400':
+          description: Dados inválidos
+
+  /assignments/{id}:
+    get:
+      tags:
+        - VehicleAssignment
+      summary: Buscar alocação por ID
+      operationId: getAssignmentById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Alocação encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VehicleAssignment'
+        '404':
+          description: Alocação não encontrada
+    put:
+      tags:
+        - VehicleAssignment
+      summary: Atualizar uma alocação
+      operationId: updateAssignment
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VehicleAssignmentRequest'
+      responses:
+        '200':
+          description: Alocação atualizada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VehicleAssignment'
+        '404':
+          description: Alocação não encontrada
+    delete:
+      tags:
+        - VehicleAssignment
+      summary: Deletar uma alocação
+      operationId: deleteAssignment
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Alocação deletada
+        '404':
+          description: Alocação não encontrada
+
+  /assignments/{id}/end:
+    patch:
+      tags:
+        - VehicleAssignment
+      summary: Encerrar uma alocação
+      operationId: endAssignment
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Alocação encerrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VehicleAssignment'
+        '404':
+          description: Alocação não encontrada
+
+  /assignments/vehicle/{vehicleId}:
+    get:
+      tags:
+        - VehicleAssignment
+      summary: Listar alocações por veículo
+      operationId: getAssignmentsByVehicle
+      parameters:
+        - name: vehicleId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: Alocações encontradas
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VehicleAssignmentPage'
+
+  /assignments/driver/{driverId}:
+    get:
+      tags:
+        - VehicleAssignment
+      summary: Listar alocações por motorista
+      operationId: getAssignmentsByDriver
+      parameters:
+        - name: driverId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: Alocações encontradas
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VehicleAssignmentPage'
+
+  /assignments/active:
+    get:
+      tags:
+        - VehicleAssignment
+      summary: Listar alocações ativas
+      operationId: getActiveAssignments
+      responses:
+        '200':
+          description: Alocações ativas encontradas
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/VehicleAssignment'
 
 components:
   schemas:
@@ -1140,6 +1895,31 @@ components:
           type: string
           format: date
           example: 2024-01-15
+        serviceOrderId:
+          type: string
+          format: uuid
+          description: ID da Ordem de Serviço vinculada
+        costCenterId:
+          type: string
+          description: ID do centro de custo
+        projectId:
+          type: string
+          description: ID do projeto
+        invoiceFuelType:
+          type: string
+          enum: [GASOLINE, DIESEL, ETHANOL, FLEX, ELECTRIC, HYBRID]
+          description: Tipo de combustível da nota fiscal
+        litersFilled:
+          type: number
+          format: double
+          description: Litros abastecidos
+        distanceTraveled:
+          type: number
+          format: double
+          description: Distância percorrida (km)
+        anomalousConsumption:
+          type: boolean
+          description: Flag de consumo anômalo
         createdAt:
           type: string
           format: date-time
@@ -1198,6 +1978,93 @@ components:
         number:
           type: integer
 
+    Driver:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        cpf:
+          type: string
+        cnhNumber:
+          type: string
+        cnhCategory:
+          type: string
+          enum: [A, B, C, D, E, AB, AC, AD, AE]
+        cnhExpiryDate:
+          type: string
+          format: date
+        cnhStatus:
+          type: string
+          enum: [ACTIVE, EXPIRED, SUSPENDED]
+        phone:
+          type: string
+        email:
+          type: string
+        birthDate:
+          type: string
+          format: date
+        address:
+          type: string
+        status:
+          type: string
+          enum: [ACTIVE, INACTIVE, SUSPENDED]
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    DriverRequest:
+      type: object
+      required:
+        - name
+        - cpf
+        - cnhNumber
+        - cnhCategory
+        - cnhExpiryDate
+      properties:
+        name:
+          type: string
+        cpf:
+          type: string
+        cnhNumber:
+          type: string
+        cnhCategory:
+          type: string
+          enum: [A, B, C, D, E, AB, AC, AD, AE]
+        cnhExpiryDate:
+          type: string
+          format: date
+        phone:
+          type: string
+        email:
+          type: string
+        birthDate:
+          type: string
+          format: date
+        address:
+          type: string
+
+    DriverPage:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/Driver'
+        totalElements:
+          type: integer
+        totalPages:
+          type: integer
+        size:
+          type: integer
+        number:
+          type: integer
+
     AuditLog:
       type: object
       properties:
@@ -1206,34 +2073,25 @@ components:
           format: uuid
         entityType:
           type: string
-          description: "Nome da classe da entidade (VehicleEntity, MaintenanceEntity)"
         entityId:
           type: string
           format: uuid
-          description: "ID da entidade"
         action:
           type: string
           enum: [CREATE, UPDATE, DELETE, STATUS_CHANGE]
-          description: "Ação realizada"
         fieldName:
           type: string
-          description: "Campo que foi alterado"
         oldValue:
           type: string
-          description: "Valor anterior"
         newValue:
           type: string
-          description: "Novo valor"
         userId:
           type: string
-          description: "ID do usuário que realizou a ação"
         timestamp:
           type: string
           format: date-time
-          description: "Quando a ação ocorreu"
         ipAddress:
           type: string
-          description: "Endereço IP do usuário"
         createdAt:
           type: string
           format: date-time
@@ -1254,26 +2112,6 @@ components:
         number:
           type: integer
 
-    ErrorResponse:
-      type: object
-      properties:
-        code:
-          type: string
-          example: NOT_FOUND
-        message:
-          type: string
-          example: Vehicle not found
-        status:
-          type: integer
-          example: 404
-        timestamp:
-          type: string
-          format: date-time
-        path:
-          type: string
-        detail:
-          type: string
-
     Fine:
       type: object
       properties:
@@ -1285,8 +2123,6 @@ components:
           format: uuid
         driverCpf:
           type: string
-          description: "CPF do motorista (XXX.XXX.XXX-XX)"
-          example: "123.456.789-00"
         description:
           type: string
         amount:
@@ -1321,8 +2157,6 @@ components:
           format: uuid
         driverCpf:
           type: string
-          description: "CPF do motorista (XXX.XXX.XXX-XX)"
-          example: "123.456.789-00"
         description:
           type: string
         amount:
@@ -1422,3 +2256,194 @@ components:
           type: integer
         number:
           type: integer
+
+    Trip:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        vehicleId:
+          type: string
+          format: uuid
+        driverId:
+          type: string
+          format: uuid
+        description:
+          type: string
+        origin:
+          type: string
+        destination:
+          type: string
+        plannedDistanceKm:
+          type: number
+          format: double
+        actualDistanceKm:
+          type: number
+          format: double
+        departureDate:
+          type: string
+          format: date-time
+        arrivalDate:
+          type: string
+          format: date-time
+        startMileage:
+          type: number
+          format: double
+        endMileage:
+          type: number
+          format: double
+        status:
+          type: string
+          enum: [PLANNED, IN_PROGRESS, COMPLETED, CANCELLED]
+        routeDeviation:
+          type: boolean
+        deviationJustification:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    TripRequest:
+      type: object
+      required:
+        - vehicleId
+        - driverId
+        - description
+        - origin
+        - destination
+        - departureDate
+      properties:
+        vehicleId:
+          type: string
+          format: uuid
+        driverId:
+          type: string
+          format: uuid
+        description:
+          type: string
+        origin:
+          type: string
+        destination:
+          type: string
+        departureDate:
+          type: string
+          format: date-time
+        plannedDistanceKm:
+          type: number
+          format: double
+        startMileage:
+          type: number
+          format: double
+
+    TripPage:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/Trip'
+        totalElements:
+          type: integer
+        totalPages:
+          type: integer
+        size:
+          type: integer
+        number:
+          type: integer
+
+    VehicleAssignment:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        vehicleId:
+          type: string
+          format: uuid
+        driverId:
+          type: string
+          format: uuid
+        startDate:
+          type: string
+          format: date
+        endDate:
+          type: string
+          format: date
+        status:
+          type: string
+          enum: [ACTIVE, ENDED, CANCELLED]
+        assignedBy:
+          type: string
+        notes:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    VehicleAssignmentRequest:
+      type: object
+      required:
+        - vehicleId
+        - driverId
+        - startDate
+        - assignedBy
+      properties:
+        vehicleId:
+          type: string
+          format: uuid
+        driverId:
+          type: string
+          format: uuid
+        startDate:
+          type: string
+          format: date
+        endDate:
+          type: string
+          format: date
+        assignedBy:
+          type: string
+        notes:
+          type: string
+
+    VehicleAssignmentPage:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/VehicleAssignment'
+        totalElements:
+          type: integer
+        totalPages:
+          type: integer
+        size:
+          type: integer
+        number:
+          type: integer
+
+    ErrorResponse:
+      type: object
+      properties:
+        code:
+          type: string
+          example: NOT_FOUND
+        message:
+          type: string
+          example: Vehicle not found
+        status:
+          type: integer
+          example: 404
+        timestamp:
+          type: string
+          format: date-time
+        path:
+          type: string
+        detail:
+          type: string

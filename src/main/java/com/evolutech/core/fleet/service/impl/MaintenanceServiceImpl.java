@@ -6,14 +6,10 @@ import com.evolutech.core.fleet.exception.BusinessException;
 import com.evolutech.core.fleet.exception.NotFoundException;
 import com.evolutech.core.fleet.mapper.MaintenanceMapper;
 import com.evolutech.core.fleet.model.entity.MaintenanceEntity;
-import com.evolutech.core.fleet.model.entity.ServiceOrderEntity;
 import com.evolutech.core.fleet.model.entity.VehicleEntity;
 import com.evolutech.core.fleet.model.utils.enums.FuelType;
 import com.evolutech.core.fleet.model.utils.enums.MaintenanceStatus;
-import com.evolutech.core.fleet.model.utils.enums.MaintenanceType;
-import com.evolutech.core.fleet.model.utils.enums.ServiceOrderStatus;
 import com.evolutech.core.fleet.repository.MaintenanceRepository;
-import com.evolutech.core.fleet.repository.ServiceOrderRepository;
 import com.evolutech.core.fleet.repository.VehicleRepository;
 import com.evolutech.core.fleet.service.MaintenanceService;
 import lombok.extern.slf4j.Slf4j;
@@ -35,13 +31,11 @@ public class MaintenanceServiceImpl implements MaintenanceService {
 
     private final MaintenanceRepository maintenanceRepository;
     private final VehicleRepository vehicleRepository;
-    private final ServiceOrderRepository serviceOrderRepository;
     private final MaintenanceMapper maintenanceMapper;
 
-    public MaintenanceServiceImpl(MaintenanceRepository maintenanceRepository, VehicleRepository vehicleRepository, ServiceOrderRepository serviceOrderRepository, MaintenanceMapper maintenanceMapper) {
+    public MaintenanceServiceImpl(MaintenanceRepository maintenanceRepository, VehicleRepository vehicleRepository, MaintenanceMapper maintenanceMapper) {
         this.maintenanceRepository = maintenanceRepository;
         this.vehicleRepository = vehicleRepository;
-        this.serviceOrderRepository = serviceOrderRepository;
         this.maintenanceMapper = maintenanceMapper;
     }
 
@@ -53,34 +47,15 @@ public class MaintenanceServiceImpl implements MaintenanceService {
                 .findById(request.getVehicleId())
                 .orElseThrow(() -> new NotFoundException("Vehicle not found with id: " + request.getVehicleId()));
 
-        ServiceOrderEntity serviceOrder = null;
-        if (request.getServiceOrderId() != null) {
-            serviceOrder = serviceOrderRepository.findById(request.getServiceOrderId())
-                    .orElseThrow(() -> new NotFoundException("Service order not found with id: " + request.getServiceOrderId()));
-        }
-
-        MaintenanceType maintenanceType = MaintenanceType.valueOf(request.getType());
-
-        if (maintenanceType == MaintenanceType.MAINTENANCE && serviceOrder == null) {
-            throw new BusinessException("Service order is required for MAINTENANCE type");
-        }
-
-        if (maintenanceType == MaintenanceType.MAINTENANCE && serviceOrder != null && serviceOrder.getStatus() != ServiceOrderStatus.APPROVED) {
-            throw new BusinessException("Service order must be APPROVED for MAINTENANCE type");
-        }
-
-        if (maintenanceType != MaintenanceType.MAINTENANCE && request.getCostCenterId() == null && request.getProjectId() == null) {
-            throw new BusinessException("At least one of costCenterId or projectId is required for " + maintenanceType + " type");
-        }
-
-        if (maintenanceType == MaintenanceType.FUEL) {
+        if (request.getType() != null && request.getType().equals("FUEL")) {
             validateFuelType(vehicle, request.getInvoiceFuelType());
         }
 
-        MaintenanceEntity entity = maintenanceMapper.toEntity(request, vehicle, serviceOrder);
+        MaintenanceEntity entity = maintenanceMapper.toEntity(request, vehicle);
         entity.setMaintenanceStatus(MaintenanceStatus.PENDING);
 
-        if (maintenanceType == MaintenanceType.FUEL && request.getLitersFilled() != null && request.getDistanceTraveled() != null) {
+        if (request.getType() != null && request.getType().equals("FUEL")
+                && request.getLitersFilled() != null && request.getDistanceTraveled() != null) {
             boolean isAnomalous = checkAnomalousConsumption(vehicle, request.getLitersFilled(), request.getDistanceTraveled());
             entity.setAnomalousConsumption(isAnomalous);
         }
@@ -98,27 +73,27 @@ public class MaintenanceServiceImpl implements MaintenanceService {
         FuelType vehicleFuelType = vehicle.getFuelType();
         FuelType invoiceFuel = FuelType.valueOf(invoiceFuelType);
 
-        if (vehicleFuelType.equals(FuelType.ELECTRIC) && invoiceFuel != FuelType.ELECTRIC) {
+        if (vehicleFuelType == FuelType.ELECTRIC && invoiceFuel != FuelType.ELECTRIC) {
             throw new BusinessException("Electric vehicle cannot use " + invoiceFuelType);
         }
 
-        if (vehicleFuelType.equals(FuelType.HYBRID) && invoiceFuel != FuelType.HYBRID && invoiceFuel != FuelType.GASOLINE && invoiceFuel != FuelType.ETHANOL) {
+        if (vehicleFuelType == FuelType.HYBRID && invoiceFuel != FuelType.HYBRID && invoiceFuel != FuelType.GASOLINE && invoiceFuel != FuelType.ETHANOL) {
             throw new BusinessException("Hybrid vehicle can only use HYBRID, GASOLINE or ETHANOL");
         }
 
-        if (vehicleFuelType.equals(FuelType.GASOLINE) && invoiceFuel != FuelType.GASOLINE) {
+        if (vehicleFuelType == FuelType.GASOLINE && invoiceFuel != FuelType.GASOLINE) {
             throw new BusinessException("Gasoline vehicle cannot use " + invoiceFuelType);
         }
 
-        if (vehicleFuelType.equals(FuelType.DIESEL) && invoiceFuel != FuelType.DIESEL) {
+        if (vehicleFuelType == FuelType.DIESEL && invoiceFuel != FuelType.DIESEL) {
             throw new BusinessException("Diesel vehicle cannot use " + invoiceFuelType);
         }
 
-        if (vehicleFuelType.equals(FuelType.ETHANOL) && invoiceFuel != FuelType.ETHANOL) {
+        if (vehicleFuelType == FuelType.ETHANOL && invoiceFuel != FuelType.ETHANOL) {
             throw new BusinessException("Ethanol vehicle cannot use " + invoiceFuelType);
         }
 
-        if (vehicleFuelType.equals(FuelType.FLEX) && invoiceFuel != FuelType.GASOLINE && invoiceFuel != FuelType.ETHANOL) {
+        if (vehicleFuelType == FuelType.FLEX && invoiceFuel != FuelType.GASOLINE && invoiceFuel != FuelType.ETHANOL) {
             throw new BusinessException("Flex vehicle can only use GASOLINE or ETHANOL");
         }
     }
@@ -131,7 +106,7 @@ public class MaintenanceServiceImpl implements MaintenanceService {
         double currentConsumption = litersFilled / distanceTraveled;
 
         List<MaintenanceEntity> recentFuelRecords = maintenanceRepository
-                .findTop10ByVehicleIdAndTypeOrderByMaintenanceDateDesc(vehicle.getId(), MaintenanceType.FUEL);
+                .findTop10ByVehicleIdAndTypeOrderByMaintenanceDateDesc(vehicle.getId(), com.evolutech.core.fleet.model.utils.enums.MaintenanceType.FUEL);
 
         if (recentFuelRecords.size() < 3) {
             return false;
@@ -193,13 +168,7 @@ public class MaintenanceServiceImpl implements MaintenanceService {
         VehicleEntity vehicle = vehicleRepository.findById(request.getVehicleId())
                 .orElseThrow(() -> new NotFoundException("Vehicle not found with id: " + request.getVehicleId()));
 
-        ServiceOrderEntity serviceOrder = null;
-        if (request.getServiceOrderId() != null) {
-            serviceOrder = serviceOrderRepository.findById(request.getServiceOrderId())
-                    .orElseThrow(() -> new NotFoundException("Service order not found with id: " + request.getServiceOrderId()));
-        }
-
-        maintenanceMapper.updateEntity(request, entity, vehicle, serviceOrder);
+        maintenanceMapper.updateEntity(request, entity, vehicle);
         MaintenanceEntity savedEntity = maintenanceRepository.save(entity);
         return maintenanceMapper.toResponseDTO(savedEntity);
     }

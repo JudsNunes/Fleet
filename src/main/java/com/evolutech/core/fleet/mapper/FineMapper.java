@@ -13,7 +13,9 @@ import java.util.List;
 public interface FineMapper {
 
     @Mapping(target = "vehicle", source = "vehicleEntity")
+    @Mapping(target = "id", ignore = true)
     @Mapping(target = "status", expression = "java(com.evolutech.core.fleet.model.utils.enums.FineStatus.valueOf(request.getStatus()))")
+    @Mapping(target = "createdAt", ignore = true)
     FineEntity toEntity(FineRequestDTO request, VehicleEntity vehicleEntity);
 
     @Mapping(target = "vehicleId", expression = "java(entity.getVehicle() != null ? entity.getVehicle().getId() : null)")

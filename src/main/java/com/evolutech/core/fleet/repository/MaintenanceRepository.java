@@ -37,6 +37,4 @@ public interface MaintenanceRepository extends JpaRepository<MaintenanceEntity, 
 
     @Query("SELECT COUNT(m) FROM MaintenanceEntity m WHERE m.deletedAt IS NULL AND m.vehicle.id = :vehicleId")
     long countByVehicleIdAndNotDeleted(@Param("vehicleId") String vehicleId);
-
-    List<MaintenanceEntity> findTop10ByVehicleIdAndTypeOrderByMaintenanceDateDesc(@Param("vehicleId") String vehicleId, com.evolutech.core.fleet.model.utils.enums.MaintenanceType type);
 }

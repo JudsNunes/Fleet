@@ -10,6 +10,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.UUID;
+
 @RestController
 @RequiredArgsConstructor
 @Slf4j
@@ -27,10 +29,10 @@ public class AuditLogController implements AuditLogsApi {
     }
 
     @Override
-    public ResponseEntity<AuditLogPageDTO> getAuditLogsByEntity(String entityType, String entityId, Integer page, Integer size) {
+    public ResponseEntity<AuditLogPageDTO> getAuditLogsByEntity(String entityType, UUID entityId, Integer page, Integer size) {
         log.info("Fetching audit logs for {} with id: {}", entityType, entityId);
         var pageable = PageRequest.of(page, size);
-        var result = auditLogService.findByEntityTypeAndEntityId(entityType, entityId, pageable);
+        var result = auditLogService.findByEntityTypeAndEntityId(entityType, entityId.toString(), pageable);
         return ResponseEntity.ok(apiMapper.toAuditLogPageApi(result));
     }
 
@@ -43,10 +45,10 @@ public class AuditLogController implements AuditLogsApi {
     }
 
     @Override
-    public ResponseEntity<AuditLogPageDTO> getAuditLogsByUser(String userId, Integer page, Integer size) {
+    public ResponseEntity<AuditLogPageDTO> getAuditLogsByUser(UUID userId, Integer page, Integer size) {
         log.info("Fetching audit logs for user: {}", userId);
         var pageable = PageRequest.of(page, size);
-        var result = auditLogService.findByUserId(userId, pageable);
+        var result = auditLogService.findByUserId(userId.toString(), pageable);
         return ResponseEntity.ok(apiMapper.toAuditLogPageApi(result));
     }
 }
