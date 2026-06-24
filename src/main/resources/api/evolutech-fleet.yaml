@@ -594,6 +594,31 @@ components:
           type: string
           enum: [ACTIVE, INACTIVE, MAINTENANCE, DECOMMISSIONED]
           description: Status do veículo
+        chassis:
+          type: string
+          description: "Número do chassi (VIN) - 17 caracteres"
+          example: "9BWZZZ377VE000001"
+        renavam:
+          type: string
+          description: "Registro Nacional de Veículos Automotores - 11 dígitos"
+          example: "12345678901"
+        fuelType:
+          type: string
+          enum: [GASOLINE, DIESEL, ETHANOL, FLEX, ELECTRIC, HYBRID]
+          description: Tipo de combustível
+        cargoCapacityKg:
+          type: number
+          format: double
+          description: Capacidade de carga em kg
+          example: 500.0
+        passengerCapacity:
+          type: integer
+          description: Capacidade de passageiros
+          example: 5
+        engineType:
+          type: string
+          description: "Tipo do motor (ex: 1.0, 1.8, 2.0, EV)"
+          example: "2.0"
         createdAt:
           type: string
           format: date-time
@@ -608,6 +633,9 @@ components:
         - model
         - brand
         - year
+        - chassis
+        - renavam
+        - fuelType
       properties:
         plate:
           type: string
@@ -629,6 +657,31 @@ components:
           type: number
           format: double
           example: 5000.0
+        chassis:
+          type: string
+          description: "Número do chassi (VIN) - 17 caracteres"
+          example: "9BWZZZ377VE000001"
+        renavam:
+          type: string
+          description: "Registro Nacional de Veículos Automotores - 11 dígitos"
+          example: "12345678901"
+        fuelType:
+          type: string
+          enum: [GASOLINE, DIESEL, ETHANOL, FLEX, ELECTRIC, HYBRID]
+          description: Tipo de combustível
+        cargoCapacityKg:
+          type: number
+          format: double
+          description: Capacidade de carga em kg
+          example: 500.0
+        passengerCapacity:
+          type: integer
+          description: Capacidade de passageiros
+          example: 5
+        engineType:
+          type: string
+          description: "Tipo do motor (ex: 1.0, 1.8, 2.0, EV)"
+          example: "2.0"
 
     VehiclePage:
       type: object
@@ -680,6 +733,31 @@ components:
           type: string
           format: date
           example: 2024-01-15
+        serviceOrderId:
+          type: string
+          format: uuid
+          description: ID da Ordem de Serviço vinculada
+        costCenterId:
+          type: string
+          description: ID do centro de custo
+        projectId:
+          type: string
+          description: ID do projeto
+        invoiceFuelType:
+          type: string
+          enum: [GASOLINE, DIESEL, ETHANOL, FLEX, ELECTRIC, HYBRID]
+          description: Tipo de combustível da nota fiscal
+        litersFilled:
+          type: number
+          format: double
+          description: Litros abastecidos
+        distanceTraveled:
+          type: number
+          format: double
+          description: Distância percorrida (km)
+        anomalousConsumption:
+          type: boolean
+          description: Flag de consumo anômalo
         createdAt:
           type: string
           format: date-time
