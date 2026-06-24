@@ -26,6 +26,10 @@ tags:
     description: Operações com multas
   - name: ServiceOrder
     description: Operações com ordens de serviço
+  - name: Trip
+    description: Gestão de viagens
+  - name: VehicleAssignment
+    description: Gestão de alocações de veículos
 
 paths:
   /vehicles:
@@ -1168,6 +1172,552 @@ paths:
                 items:
                   $ref: '#/components/schemas/ServiceOrder'
 
+  /trips:
+    get:
+      tags:
+        - Trip
+      summary: Listar todas as viagens
+      operationId: getAllTrips
+      parameters:
+        - name: vehicleId
+          in: query
+          schema:
+            type: string
+            format: uuid
+          description: Filtrar por veículo
+        - name: driverId
+          in: query
+          schema:
+            type: string
+            format: uuid
+          description: Filtrar por motorista
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [PLANNED, IN_PROGRESS, COMPLETED, CANCELLED]
+          description: Filtrar por status
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: Lista de viagens
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TripPage'
+    post:
+      tags:
+        - Trip
+      summary: Criar uma nova viagem
+      operationId: createTrip
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TripRequest'
+      responses:
+        '201':
+          description: Viagem criada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Trip'
+        '400':
+          description: Dados inválidos
+
+  /trips/{id}:
+    get:
+      tags:
+        - Trip
+      summary: Buscar viagem por ID
+      operationId: getTripById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Viagem encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Trip'
+        '404':
+          description: Viagem não encontrada
+    put:
+      tags:
+        - Trip
+      summary: Atualizar uma viagem
+      operationId: updateTrip
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TripRequest'
+      responses:
+        '200':
+          description: Viagem atualizada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Trip'
+        '404':
+          description: Viagem não encontrada
+        '400':
+          description: Dados inválidos
+    delete:
+      tags:
+        - Trip
+      summary: Deletar uma viagem
+      operationId: deleteTrip
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Viagem deletada
+        '404':
+          description: Viagem não encontrada
+
+  /trips/{id}/start:
+    patch:
+      tags:
+        - Trip
+      summary: Iniciar uma viagem
+      operationId: startTrip
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                startMileage:
+                  type: number
+                  format: double
+      responses:
+        '200':
+          description: Viagem iniciada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Trip'
+        '404':
+          description: Viagem não encontrada
+
+  /trips/{id}/complete:
+    patch:
+      tags:
+        - Trip
+      summary: Concluir uma viagem
+      operationId: completeTrip
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                endMileage:
+                  type: number
+                  format: double
+      responses:
+        '200':
+          description: Viagem concluída
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Trip'
+        '404':
+          description: Viagem não encontrada
+
+  /trips/{id}/cancel:
+    patch:
+      tags:
+        - Trip
+      summary: Cancelar uma viagem
+      operationId: cancelTrip
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Viagem cancelada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Trip'
+        '404':
+          description: Viagem não encontrada
+
+  /trips/{id}/deviation:
+    patch:
+      tags:
+        - Trip
+      summary: Registrar desvio de rota
+      operationId: registerDeviation
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                justification:
+                  type: string
+      responses:
+        '200':
+          description: Desvio registrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Trip'
+        '404':
+          description: Viagem não encontrada
+
+  /trips/vehicle/{vehicleId}:
+    get:
+      tags:
+        - Trip
+      summary: Listar viagens por veículo
+      operationId: getTripsByVehicle
+      parameters:
+        - name: vehicleId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: Viagens encontradas
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TripPage'
+
+  /trips/driver/{driverId}:
+    get:
+      tags:
+        - Trip
+      summary: Listar viagens por motorista
+      operationId: getTripsByDriver
+      parameters:
+        - name: driverId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: Viagens encontradas
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TripPage'
+
+  /assignments:
+    get:
+      tags:
+        - VehicleAssignment
+      summary: Listar todas as alocações
+      operationId: getAllAssignments
+      parameters:
+        - name: vehicleId
+          in: query
+          schema:
+            type: string
+            format: uuid
+          description: Filtrar por veículo
+        - name: driverId
+          in: query
+          schema:
+            type: string
+            format: uuid
+          description: Filtrar por motorista
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [ACTIVE, ENDED, CANCELLED]
+          description: Filtrar por status
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: Lista de alocações
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VehicleAssignmentPage'
+    post:
+      tags:
+        - VehicleAssignment
+      summary: Criar uma nova alocação
+      operationId: createAssignment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VehicleAssignmentRequest'
+      responses:
+        '201':
+          description: Alocação criada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VehicleAssignment'
+        '400':
+          description: Dados inválidos
+
+  /assignments/{id}:
+    get:
+      tags:
+        - VehicleAssignment
+      summary: Buscar alocação por ID
+      operationId: getAssignmentById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Alocação encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VehicleAssignment'
+        '404':
+          description: Alocação não encontrada
+    put:
+      tags:
+        - VehicleAssignment
+      summary: Atualizar uma alocação
+      operationId: updateAssignment
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VehicleAssignmentRequest'
+      responses:
+        '200':
+          description: Alocação atualizada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VehicleAssignment'
+        '404':
+          description: Alocação não encontrada
+    delete:
+      tags:
+        - VehicleAssignment
+      summary: Deletar uma alocação
+      operationId: deleteAssignment
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Alocação deletada
+        '404':
+          description: Alocação não encontrada
+
+  /assignments/{id}/end:
+    patch:
+      tags:
+        - VehicleAssignment
+      summary: Encerrar uma alocação
+      operationId: endAssignment
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Alocação encerrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VehicleAssignment'
+        '404':
+          description: Alocação não encontrada
+
+  /assignments/vehicle/{vehicleId}:
+    get:
+      tags:
+        - VehicleAssignment
+      summary: Listar alocações por veículo
+      operationId: getAssignmentsByVehicle
+      parameters:
+        - name: vehicleId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: Alocações encontradas
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VehicleAssignmentPage'
+
+  /assignments/driver/{driverId}:
+    get:
+      tags:
+        - VehicleAssignment
+      summary: Listar alocações por motorista
+      operationId: getAssignmentsByDriver
+      parameters:
+        - name: driverId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: Alocações encontradas
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VehicleAssignmentPage'
+
+  /assignments/active:
+    get:
+      tags:
+        - VehicleAssignment
+      summary: Listar alocações ativas
+      operationId: getActiveAssignments
+      responses:
+        '200':
+          description: Alocações ativas encontradas
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/VehicleAssignment'
+
 components:
   schemas:
     Vehicle:
@@ -1698,6 +2248,177 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/ServiceOrder'
+        totalElements:
+          type: integer
+        totalPages:
+          type: integer
+        size:
+          type: integer
+        number:
+          type: integer
+
+    Trip:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        vehicleId:
+          type: string
+          format: uuid
+        driverId:
+          type: string
+          format: uuid
+        description:
+          type: string
+        origin:
+          type: string
+        destination:
+          type: string
+        plannedDistanceKm:
+          type: number
+          format: double
+        actualDistanceKm:
+          type: number
+          format: double
+        departureDate:
+          type: string
+          format: date-time
+        arrivalDate:
+          type: string
+          format: date-time
+        startMileage:
+          type: number
+          format: double
+        endMileage:
+          type: number
+          format: double
+        status:
+          type: string
+          enum: [PLANNED, IN_PROGRESS, COMPLETED, CANCELLED]
+        routeDeviation:
+          type: boolean
+        deviationJustification:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    TripRequest:
+      type: object
+      required:
+        - vehicleId
+        - driverId
+        - description
+        - origin
+        - destination
+        - departureDate
+      properties:
+        vehicleId:
+          type: string
+          format: uuid
+        driverId:
+          type: string
+          format: uuid
+        description:
+          type: string
+        origin:
+          type: string
+        destination:
+          type: string
+        departureDate:
+          type: string
+          format: date-time
+        plannedDistanceKm:
+          type: number
+          format: double
+        startMileage:
+          type: number
+          format: double
+
+    TripPage:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/Trip'
+        totalElements:
+          type: integer
+        totalPages:
+          type: integer
+        size:
+          type: integer
+        number:
+          type: integer
+
+    VehicleAssignment:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        vehicleId:
+          type: string
+          format: uuid
+        driverId:
+          type: string
+          format: uuid
+        startDate:
+          type: string
+          format: date
+        endDate:
+          type: string
+          format: date
+        status:
+          type: string
+          enum: [ACTIVE, ENDED, CANCELLED]
+        assignedBy:
+          type: string
+        notes:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    VehicleAssignmentRequest:
+      type: object
+      required:
+        - vehicleId
+        - driverId
+        - startDate
+        - assignedBy
+      properties:
+        vehicleId:
+          type: string
+          format: uuid
+        driverId:
+          type: string
+          format: uuid
+        startDate:
+          type: string
+          format: date
+        endDate:
+          type: string
+          format: date
+        assignedBy:
+          type: string
+        notes:
+          type: string
+
+    VehicleAssignmentPage:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/VehicleAssignment'
         totalElements:
           type: integer
         totalPages:
