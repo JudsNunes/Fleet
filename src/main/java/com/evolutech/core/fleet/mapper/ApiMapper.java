@@ -249,4 +249,49 @@ public class ApiMapper {
         dto.setNumber(page.getNumber());
         return dto;
     }
+
+    public com.evolutech.core.fleet.model.dto.request.TripRequestDTO toTripRequestInternal(com.evolutech.fleet.api.model.TripRequestDTO api) {
+        return com.evolutech.core.fleet.model.dto.request.TripRequestDTO.builder()
+                .vehicleId(api.getVehicleId() != null ? api.getVehicleId().toString() : null)
+                .driverId(api.getDriverId() != null ? api.getDriverId().toString() : null)
+                .description(api.getDescription())
+                .origin(api.getOrigin())
+                .destination(api.getDestination())
+                .plannedDistanceKm(api.getPlannedDistanceKm())
+                .departureDate(api.getDepartureDate())
+                .startMileage(api.getStartMileage())
+                .build();
+    }
+
+    public com.evolutech.fleet.api.model.TripDTO toTripApi(com.evolutech.core.fleet.model.dto.response.TripResponseDTO internal) {
+        var dto = new com.evolutech.fleet.api.model.TripDTO();
+        dto.setId(internal.getId() != null ? java.util.UUID.fromString(internal.getId()) : null);
+        dto.setVehicleId(internal.getVehicleId() != null ? java.util.UUID.fromString(internal.getVehicleId()) : null);
+        dto.setDriverId(internal.getDriverId() != null ? java.util.UUID.fromString(internal.getDriverId()) : null);
+        dto.setDescription(internal.getDescription());
+        dto.setOrigin(internal.getOrigin());
+        dto.setDestination(internal.getDestination());
+        dto.setPlannedDistanceKm(internal.getPlannedDistanceKm());
+        dto.setActualDistanceKm(internal.getActualDistanceKm());
+        dto.setDepartureDate(internal.getDepartureDate());
+        dto.setArrivalDate(internal.getArrivalDate());
+        dto.setStartMileage(internal.getStartMileage());
+        dto.setEndMileage(internal.getEndMileage());
+        dto.setStatus(internal.getStatus() != null ? com.evolutech.fleet.api.model.TripDTO.StatusEnum.fromValue(internal.getStatus()) : null);
+        dto.setRouteDeviation(internal.getRouteDeviation());
+        dto.setDeviationJustification(internal.getDeviationJustification());
+        dto.setCreatedAt(internal.getCreatedAt());
+        dto.setUpdatedAt(internal.getUpdatedAt());
+        return dto;
+    }
+
+    public com.evolutech.fleet.api.model.TripPageDTO toTripPageApi(org.springframework.data.domain.Page<com.evolutech.core.fleet.model.dto.response.TripResponseDTO> page) {
+        var dto = new com.evolutech.fleet.api.model.TripPageDTO();
+        dto.setContent(page.getContent().stream().map(this::toTripApi).collect(Collectors.toList()));
+        dto.setTotalElements((int) page.getTotalElements());
+        dto.setTotalPages(page.getTotalPages());
+        dto.setSize(page.getSize());
+        dto.setNumber(page.getNumber());
+        return dto;
+    }
 }

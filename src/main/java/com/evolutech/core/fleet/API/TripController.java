@@ -1,112 +1,115 @@
 package com.evolutech.core.fleet.API;
 
-import com.evolutech.core.fleet.model.dto.request.TripRequestDTO;
-import com.evolutech.core.fleet.model.dto.response.TripResponseDTO;
-import com.evolutech.core.fleet.model.utils.enums.TripStatus;
+import com.evolutech.core.fleet.mapper.ApiMapper;
 import com.evolutech.core.fleet.service.TripService;
-import jakarta.validation.Valid;
+import com.evolutech.fleet.api.TripsApi;
+import com.evolutech.fleet.api.model.TripDTO;
+import com.evolutech.fleet.api.model.TripPageDTO;
+import com.evolutech.fleet.api.model.TripRequestDTO;
+import com.evolutech.fleet.api.model.StartTripRequestDTO;
+import com.evolutech.fleet.api.model.CompleteTripRequestDTO;
+import com.evolutech.fleet.api.model.RegisterDeviationRequestDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PageableDefault;
-import org.springframework.http.HttpStatus;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Map;
+import java.util.UUID;
 
 @RestController
-@RequestMapping("/trips")
 @RequiredArgsConstructor
 @Slf4j
-public class TripController {
+public class TripController implements TripsApi {
 
     private final TripService tripService;
+    private final ApiMapper apiMapper;
 
-    @GetMapping("/{id}")
-    public ResponseEntity<TripResponseDTO> getTripById(@PathVariable String id) {
-        log.info("Fetching trip: {}", id);
-        return tripService.findById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    @Override
+    public ResponseEntity<TripDTO> createTrip(TripRequestDTO tripRequestDTO) {
+        log.info("Creating trip for vehicle: {} and driver: {}", tripRequestDTO.getVehicleId(), tripRequestDTO.getDriverId());
+        var internalRequest = apiMapper.toTripRequestInternal(tripRequestDTO);
+        var result = tripService.save(internalRequest);
+        return ResponseEntity.status(201).body(apiMapper.toTripApi(result));
     }
 
-    @PostMapping
-    public ResponseEntity<TripResponseDTO> createTrip(@Valid @RequestBody TripRequestDTO body) {
-        log.info("Creating trip for vehicle: {} and driver: {}", body.getVehicleId(), body.getDriverId());
-        var result = tripService.save(body);
-        return ResponseEntity.status(HttpStatus.CREATED).body(result);
-    }
-
-    @PutMapping("/{id}")
-    public ResponseEntity<TripResponseDTO> updateTrip(@PathVariable String id, @Valid @RequestBody TripRequestDTO body) {
-        log.info("Updating trip: {}", id);
-        var result = tripService.update(id, body);
-        return ResponseEntity.ok(result);
-    }
-
-    @PatchMapping("/{id}/start")
-    public ResponseEntity<TripResponseDTO> startTrip(@PathVariable String id, @RequestBody Map<String, Double> body) {
-        log.info("Starting trip: {}", id);
-        var result = tripService.start(id, body.get("startMileage"));
-        return ResponseEntity.ok(result);
-    }
-
-    @PatchMapping("/{id}/complete")
-    public ResponseEntity<TripResponseDTO> completeTrip(@PathVariable String id, @RequestBody Map<String, Double> body) {
-        log.info("Completing trip: {}", id);
-        var result = tripService.complete(id, body.get("endMileage"));
-        return ResponseEntity.ok(result);
-    }
-
-    @PatchMapping("/{id}/cancel")
-    public ResponseEntity<TripResponseDTO> cancelTrip(@PathVariable String id) {
-        log.info("Cancelling trip: {}", id);
-        var result = tripService.cancel(id);
-        return ResponseEntity.ok(result);
-    }
-
-    @PatchMapping("/{id}/deviation")
-    public ResponseEntity<TripResponseDTO> registerDeviation(@PathVariable String id, @RequestBody Map<String, String> body) {
-        log.info("Registering deviation for trip: {}", id);
-        var result = tripService.registerDeviation(id, body.get("justification"));
-        return ResponseEntity.ok(result);
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteTrip(@PathVariable String id) {
+    @Override
+    public ResponseEntity<Void> deleteTrip(UUID id) {
         log.info("Deleting trip: {}", id);
-        tripService.delete(id);
+        tripService.delete(id.toString());
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping
-    public ResponseEntity<Page<TripResponseDTO>> getAllTrips(
-            @RequestParam(required = false) String vehicleId,
-            @RequestParam(required = false) String driverId,
-            @RequestParam(required = false) TripStatus status,
-            @PageableDefault(size = 20, page = 0) Pageable pageable) {
-        log.info("Fetching trips - vehicle: {}, driver: {}, status: {}", vehicleId, driverId, status);
-        if (vehicleId != null || driverId != null || status != null) {
-            return ResponseEntity.ok(tripService.findByFilters(vehicleId, driverId, status, pageable));
-        }
-        return ResponseEntity.ok(tripService.findAllPaged(pageable));
+    @Override
+    public ResponseEntity<TripPageDTO> getAllTrips(UUID vehicleId, UUID driverId, String status, Integer page, Integer size) {
+        log.info("Fetching trips - page: {}, size: {}", page, size);
+        var pageable = PageRequest.of(page, size, Sort.by("departureDate").descending());
+        var trips = tripService.findByFilters(
+                vehicleId != null ? vehicleId.toString() : null,
+                driverId != null ? driverId.toString() : null,
+                status != null ? com.evolutech.core.fleet.model.utils.enums.TripStatus.valueOf(status) : null,
+                pageable);
+        return ResponseEntity.ok(apiMapper.toTripPageApi(trips));
     }
 
-    @GetMapping("/vehicle/{vehicleId}")
-    public ResponseEntity<Page<TripResponseDTO>> getTripsByVehicle(
-            @PathVariable String vehicleId,
-            @PageableDefault(size = 20, page = 0) Pageable pageable) {
+    @Override
+    public ResponseEntity<TripDTO> getTripById(UUID id) {
+        log.info("Fetching trip: {}", id);
+        return tripService.findById(id.toString())
+                .map(t -> ResponseEntity.ok(apiMapper.toTripApi(t)))
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @Override
+    public ResponseEntity<TripDTO> updateTrip(UUID id, TripRequestDTO tripRequestDTO) {
+        log.info("Updating trip: {}", id);
+        var internalRequest = apiMapper.toTripRequestInternal(tripRequestDTO);
+        var result = tripService.update(id.toString(), internalRequest);
+        return ResponseEntity.ok(apiMapper.toTripApi(result));
+    }
+
+    @Override
+    public ResponseEntity<TripDTO> startTrip(UUID id, StartTripRequestDTO startTripRequestDTO) {
+        log.info("Starting trip: {}", id);
+        var result = tripService.start(id.toString(), startTripRequestDTO.getStartMileage());
+        return ResponseEntity.ok(apiMapper.toTripApi(result));
+    }
+
+    @Override
+    public ResponseEntity<TripDTO> completeTrip(UUID id, CompleteTripRequestDTO completeTripRequestDTO) {
+        log.info("Completing trip: {}", id);
+        var result = tripService.complete(id.toString(), completeTripRequestDTO.getEndMileage());
+        return ResponseEntity.ok(apiMapper.toTripApi(result));
+    }
+
+    @Override
+    public ResponseEntity<TripDTO> cancelTrip(UUID id) {
+        log.info("Cancelling trip: {}", id);
+        var result = tripService.cancel(id.toString());
+        return ResponseEntity.ok(apiMapper.toTripApi(result));
+    }
+
+    @Override
+    public ResponseEntity<TripDTO> registerDeviation(UUID id, RegisterDeviationRequestDTO registerDeviationRequestDTO) {
+        log.info("Registering deviation for trip: {}", id);
+        var result = tripService.registerDeviation(id.toString(), registerDeviationRequestDTO.getJustification());
+        return ResponseEntity.ok(apiMapper.toTripApi(result));
+    }
+
+    @Override
+    public ResponseEntity<TripPageDTO> getTripsByVehicle(UUID vehicleId, Integer page, Integer size) {
         log.info("Fetching trips by vehicle: {}", vehicleId);
-        return ResponseEntity.ok(tripService.findByVehicleId(vehicleId, pageable));
+        var pageable = PageRequest.of(page, size, Sort.by("departureDate").descending());
+        var result = tripService.findByVehicleId(vehicleId.toString(), pageable);
+        return ResponseEntity.ok(apiMapper.toTripPageApi(result));
     }
 
-    @GetMapping("/driver/{driverId}")
-    public ResponseEntity<Page<TripResponseDTO>> getTripsByDriver(
-            @PathVariable String driverId,
-            @PageableDefault(size = 20, page = 0) Pageable pageable) {
+    @Override
+    public ResponseEntity<TripPageDTO> getTripsByDriver(UUID driverId, Integer page, Integer size) {
         log.info("Fetching trips by driver: {}", driverId);
-        return ResponseEntity.ok(tripService.findByDriverId(driverId, pageable));
+        var pageable = PageRequest.of(page, size, Sort.by("departureDate").descending());
+        var result = tripService.findByDriverId(driverId.toString(), pageable);
+        return ResponseEntity.ok(apiMapper.toTripPageApi(result));
     }
 }
