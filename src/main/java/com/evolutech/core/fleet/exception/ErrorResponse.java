@@ -18,17 +18,10 @@ import java.util.List;
 public class ErrorResponse {
 
     private String code;
-    
     private String message;
-    
     private int status;
-    
     private LocalDateTime timestamp;
-    
     private String path;
-    
-   
     private List<FieldValidationError> fieldErrors;
-    
     private String detail;
 }
