@@ -18,12 +18,8 @@ tags:
     description: Operações com veículos
   - name: Maintenance
     description: Operações com manutenções
-  - name: ServiceOrder
-    description: Ordens de Serviço
-  - name: AuditLog
-    description: Logs de auditoria
-  - name: Fine
-    description: Multas de trânsito
+  - name: Driver
+    description: Gestão de motoristas
 
 paths:
   /vehicles:
@@ -359,13 +355,31 @@ paths:
                 items:
                   $ref: '#/components/schemas/Maintenance'
 
-  /service-orders:
+  /drivers:
     get:
       tags:
-        - ServiceOrder
-      summary: Listar todas as ordens de serviço
-      operationId: getAllServiceOrders
+        - Driver
+      summary: Listar motoristas
+      operationId: getAllDrivers
       parameters:
+        - name: name
+          in: query
+          schema:
+            type: string
+        - name: cpf
+          in: query
+          schema:
+            type: string
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [ACTIVE, INACTIVE, SUSPENDED]
+        - name: cnhStatus
+          in: query
+          schema:
+            type: string
+            enum: [ACTIVE, EXPIRED, SUSPENDED]
         - name: page
           in: query
           schema:
@@ -378,40 +392,40 @@ paths:
             default: 20
       responses:
         '200':
-          description: Lista de ordens de serviço
+          description: Lista de motoristas
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ServiceOrderPage'
+                $ref: '#/components/schemas/DriverPage'
     post:
       tags:
-        - ServiceOrder
-      summary: Criar uma nova ordem de serviço
-      operationId: createServiceOrder
+        - Driver
+      summary: Criar motorista
+      operationId: createDriver
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ServiceOrderRequest'
+              $ref: '#/components/schemas/DriverRequest'
       responses:
         '201':
-          description: Ordem de serviço criada
+          description: Motorista criado
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ServiceOrder'
+                $ref: '#/components/schemas/Driver'
         '400':
           description: Dados inválidos
-        '404':
-          description: Veículo não encontrado
+        '409':
+          description: CPF ou CNH duplicada
 
-  /service-orders/{id}:
+  /drivers/{id}:
     get:
       tags:
-        - ServiceOrder
-      summary: Buscar ordem de serviço por ID
-      operationId: getServiceOrderById
+        - Driver
+      summary: Buscar motorista por UUID
+      operationId: getDriverById
       parameters:
         - name: id
           in: path
@@ -421,18 +435,18 @@ paths:
             format: uuid
       responses:
         '200':
-          description: Ordem de serviço encontrada
+          description: Motorista encontrado
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ServiceOrder'
+                $ref: '#/components/schemas/Driver'
         '404':
-          description: Ordem de serviço não encontrada
+          description: Motorista não encontrado
     put:
       tags:
-        - ServiceOrder
-      summary: Atualizar uma ordem de serviço
-      operationId: updateServiceOrder
+        - Driver
+      summary: Atualizar motorista
+      operationId: updateDriver
       parameters:
         - name: id
           in: path
@@ -445,17 +459,17 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ServiceOrderRequest'
+              $ref: '#/components/schemas/DriverRequest'
       responses:
         '200':
-          description: Ordem de serviço atualizada
+          description: Motorista atualizado
         '404':
-          description: Ordem de serviço não encontrada
+          description: Motorista não encontrado
     delete:
       tags:
-        - ServiceOrder
-      summary: Deletar uma ordem de serviço (soft-delete)
-      operationId: deleteServiceOrder
+        - Driver
+      summary: Deletar motorista (soft-delete)
+      operationId: deleteDriver
       parameters:
         - name: id
           in: path
@@ -465,16 +479,16 @@ paths:
             format: uuid
       responses:
         '204':
-          description: Ordem de serviço deletada
+          description: Motorista deletado
         '404':
-          description: Ordem de serviço não encontrada
+          description: Motorista não encontrado
 
-  /service-orders/{id}/approve:
+  /drivers/{id}/status:
     patch:
       tags:
-        - ServiceOrder
-      summary: Aprovar ordem de serviço
-      operationId: approveServiceOrder
+        - Driver
+      summary: Atualizar status do motorista
+      operationId: updateDriverStatus
       parameters:
         - name: id
           in: path
@@ -487,481 +501,60 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ServiceOrderApproval'
+              type: object
+              properties:
+                status:
+                  type: string
+                  enum: [ACTIVE, INACTIVE, SUSPENDED]
       responses:
         '200':
-          description: Ordem de serviço aprovada
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ServiceOrder'
-        '400':
-          description: Status inválido para aprovação
+          description: Status atualizado
         '404':
-          description: Ordem de serviço não encontrada
+          description: Motorista não encontrado
 
-  /service-orders/{id}/reject:
-    patch:
-      tags:
-        - ServiceOrder
-      summary: Rejeitar ordem de serviço
-      operationId: rejectServiceOrder
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ServiceOrderApproval'
-      responses:
-        '200':
-          description: Ordem de serviço rejeitada
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ServiceOrder'
-        '400':
-          description: Status inválido para rejeição
-        '404':
-          description: Ordem de serviço não encontrada
-
-  /service-orders/{id}/complete:
-    patch:
-      tags:
-        - ServiceOrder
-      summary: Completar ordem de serviço
-      operationId: completeServiceOrder
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-      responses:
-        '200':
-          description: Ordem de serviço completada
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ServiceOrder'
-        '400':
-          description: Status inválido para completar
-        '404':
-          description: Ordem de serviço não encontrada
-
-  /service-orders/vehicle/{vehicleId}:
+  /drivers/cpf/{cpf}:
     get:
       tags:
-        - ServiceOrder
-      summary: Listar ordens de serviço por veículo
-      operationId: getServiceOrdersByVehicle
+        - Driver
+      summary: Buscar motorista por CPF
+      operationId: getDriverByCpf
       parameters:
-        - name: vehicleId
+        - name: cpf
           in: path
           required: true
           schema:
             type: string
-            format: uuid
-        - name: page
-          in: query
-          schema:
-            type: integer
-            default: 0
-        - name: size
-          in: query
-          schema:
-            type: integer
-            default: 20
       responses:
         '200':
-          description: Ordens de serviço encontradas
+          description: Motorista encontrado
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ServiceOrderPage'
+                $ref: '#/components/schemas/Driver'
+        '404':
+          description: Motorista não encontrado
 
-  /service-orders/status/{status}:
+  /drivers/expiring-cnhs:
     get:
       tags:
-        - ServiceOrder
-      summary: Listar ordens de serviço por status
-      operationId: getServiceOrdersByStatus
+        - Driver
+      summary: Listar motoristas com CNH vencendo
+      operationId: getExpiringCnhs
       parameters:
-        - name: status
-          in: path
-          required: true
-          schema:
-            type: string
-            enum: [PENDING, APPROVED, REJECTED, COMPLETED]
-        - name: page
+        - name: days
           in: query
           schema:
             type: integer
-            default: 0
-        - name: size
-          in: query
-          schema:
-            type: integer
-            default: 20
+            default: 30
       responses:
         '200':
-          description: Ordens de serviço encontradas
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ServiceOrderPage'
-
-  /service-orders/warranty/{vehicleId}:
-    get:
-      tags:
-        - ServiceOrder
-      summary: Listar garantias ativas por veículo
-      operationId: getActiveWarranties
-      parameters:
-        - name: vehicleId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-      responses:
-        '200':
-          description: Garantias ativas encontradas
+          description: Lista de motoristas com CNH vencendo
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/ServiceOrder'
-
-  /audit-logs:
-    get:
-      tags:
-        - AuditLog
-      summary: Listar todos os logs de auditoria
-      operationId: getAllAuditLogs
-      parameters:
-        - name: page
-          in: query
-          schema:
-            type: integer
-            default: 0
-        - name: size
-          in: query
-          schema:
-            type: integer
-            default: 20
-      responses:
-        '200':
-          description: Lista de logs de auditoria
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/AuditLogPage'
-
-  /audit-logs/entity/{entityType}/{entityId}:
-    get:
-      tags:
-        - AuditLog
-      summary: Listar logs de auditoria por entidade
-      operationId: getAuditLogsByEntity
-      parameters:
-        - name: entityType
-          in: path
-          required: true
-          schema:
-            type: string
-        - name: entityId
-          in: path
-          required: true
-          schema:
-            type: string
-        - name: page
-          in: query
-          schema:
-            type: integer
-            default: 0
-        - name: size
-          in: query
-          schema:
-            type: integer
-            default: 20
-      responses:
-        '200':
-          description: Logs de auditoria encontrados
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/AuditLogPage'
-
-  /audit-logs/entity/{entityType}:
-    get:
-      tags:
-        - AuditLog
-      summary: Listar logs de auditoria por tipo de entidade
-      operationId: getAuditLogsByEntityType
-      parameters:
-        - name: entityType
-          in: path
-          required: true
-          schema:
-            type: string
-        - name: page
-          in: query
-          schema:
-            type: integer
-            default: 0
-        - name: size
-          in: query
-          schema:
-            type: integer
-            default: 20
-      responses:
-        '200':
-          description: Logs de auditoria encontrados
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/AuditLogPage'
-
-  /audit-logs/user/{userId}:
-    get:
-      tags:
-        - AuditLog
-      summary: Listar logs de auditoria por usuário
-      operationId: getAuditLogsByUser
-      parameters:
-        - name: userId
-          in: path
-          required: true
-          schema:
-            type: string
-        - name: page
-          in: query
-          schema:
-            type: integer
-            default: 0
-        - name: size
-          in: query
-          schema:
-            type: integer
-            default: 20
-      responses:
-        '200':
-          description: Logs de auditoria encontrados
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/AuditLogPage'
-
-  /fines:
-    get:
-      tags:
-        - Fine
-      summary: Listar todas as multas
-      operationId: getAllFines
-      parameters:
-        - name: page
-          in: query
-          schema:
-            type: integer
-            default: 0
-        - name: size
-          in: query
-          schema:
-            type: integer
-            default: 20
-      responses:
-        '200':
-          description: Lista de multas
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/FinePage'
-    post:
-      tags:
-        - Fine
-      summary: Criar uma nova multa
-      operationId: createFine
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/FineRequest'
-      responses:
-        '201':
-          description: Multa criada
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Fine'
-        '400':
-          description: Dados inválidos
-        '404':
-          description: Veículo não encontrado
-
-  /fines/{id}:
-    get:
-      tags:
-        - Fine
-      summary: Buscar multa por ID
-      operationId: getFineById
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-      responses:
-        '200':
-          description: Multa encontrada
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Fine'
-        '404':
-          description: Multa não encontrada
-    put:
-      tags:
-        - Fine
-      summary: Atualizar uma multa
-      operationId: updateFine
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/FineRequest'
-      responses:
-        '200':
-          description: Multa atualizada
-        '404':
-          description: Multa não encontrada
-    delete:
-      tags:
-        - Fine
-      summary: Deletar uma multa
-      operationId: deleteFine
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-      responses:
-        '204':
-          description: Multa deletada
-        '404':
-          description: Multa não encontrada
-
-  /fines/driver/{driverCpf}:
-    get:
-      tags:
-        - Fine
-      summary: Listar multas por CPF do motorista
-      operationId: getFinesByDriverCpf
-      parameters:
-        - name: driverCpf
-          in: path
-          required: true
-          schema:
-            type: string
-        - name: page
-          in: query
-          schema:
-            type: integer
-            default: 0
-        - name: size
-          in: query
-          schema:
-            type: integer
-            default: 20
-      responses:
-        '200':
-          description: Multas encontradas
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/FinePage'
-
-  /fines/vehicle/{vehicleId}:
-    get:
-      tags:
-        - Fine
-      summary: Listar multas por veículo
-      operationId: getFinesByVehicle
-      parameters:
-        - name: vehicleId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-        - name: page
-          in: query
-          schema:
-            type: integer
-            default: 0
-        - name: size
-          in: query
-          schema:
-            type: integer
-            default: 20
-      responses:
-        '200':
-          description: Multas encontradas
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/FinePage'
-
-  /fines/status/{status}:
-    get:
-      tags:
-        - Fine
-      summary: Listar multas por status
-      operationId: getFinesByStatus
-      parameters:
-        - name: status
-          in: path
-          required: true
-          schema:
-            type: string
-            enum: [PENDING, PAID, DISPUTED]
-        - name: page
-          in: query
-          schema:
-            type: integer
-            default: 0
-        - name: size
-          in: query
-          schema:
-            type: integer
-            default: 20
-      responses:
-        '200':
-          description: Multas encontradas
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/FinePage'
+                  $ref: '#/components/schemas/Driver'
 
 components:
   schemas:
@@ -1001,31 +594,6 @@ components:
           type: string
           enum: [ACTIVE, INACTIVE, MAINTENANCE, DECOMMISSIONED]
           description: Status do veículo
-        chassis:
-          type: string
-          description: "Número do chassi (VIN) - 17 caracteres"
-          example: "9BWZZZ377VE000001"
-        renavam:
-          type: string
-          description: "Registro Nacional de Veículos Automotores - 11 dígitos"
-          example: "12345678901"
-        fuelType:
-          type: string
-          enum: [GASOLINE, DIESEL, ETHANOL, FLEX, ELECTRIC, HYBRID]
-          description: Tipo de combustível
-        cargoCapacityKg:
-          type: number
-          format: double
-          description: Capacidade de carga em kg
-          example: 500.0
-        passengerCapacity:
-          type: integer
-          description: Capacidade de passageiros
-          example: 5
-        engineType:
-          type: string
-          description: "Tipo do motor (ex: 1.0, 1.8, 2.0, EV)"
-          example: "2.0"
         createdAt:
           type: string
           format: date-time
@@ -1040,9 +608,6 @@ components:
         - model
         - brand
         - year
-        - chassis
-        - renavam
-        - fuelType
       properties:
         plate:
           type: string
@@ -1064,31 +629,6 @@ components:
           type: number
           format: double
           example: 5000.0
-        chassis:
-          type: string
-          description: "Número do chassi (VIN) - 17 caracteres"
-          example: "9BWZZZ377VE000001"
-        renavam:
-          type: string
-          description: "Registro Nacional de Veículos Automotores - 11 dígitos"
-          example: "12345678901"
-        fuelType:
-          type: string
-          enum: [GASOLINE, DIESEL, ETHANOL, FLEX, ELECTRIC, HYBRID]
-          description: Tipo de combustível
-        cargoCapacityKg:
-          type: number
-          format: double
-          description: Capacidade de carga em kg
-          example: 500.0
-        passengerCapacity:
-          type: integer
-          description: Capacidade de passageiros
-          example: 5
-        engineType:
-          type: string
-          description: "Tipo do motor (ex: 1.0, 1.8, 2.0, EV)"
-          example: "2.0"
 
     VehiclePage:
       type: object
@@ -1198,53 +738,84 @@ components:
         number:
           type: integer
 
-    AuditLog:
+    Driver:
       type: object
       properties:
         id:
           type: string
           format: uuid
-        entityType:
+        name:
           type: string
-          description: "Nome da classe da entidade (VehicleEntity, MaintenanceEntity)"
-        entityId:
+        cpf:
           type: string
-          format: uuid
-          description: "ID da entidade"
-        action:
+        cnhNumber:
           type: string
-          enum: [CREATE, UPDATE, DELETE, STATUS_CHANGE]
-          description: "Ação realizada"
-        fieldName:
+        cnhCategory:
           type: string
-          description: "Campo que foi alterado"
-        oldValue:
+          enum: [A, B, C, D, E, AB, AC, AD, AE]
+        cnhExpiryDate:
           type: string
-          description: "Valor anterior"
-        newValue:
+          format: date
+        cnhStatus:
           type: string
-          description: "Novo valor"
-        userId:
+          enum: [ACTIVE, EXPIRED, SUSPENDED]
+        phone:
           type: string
-          description: "ID do usuário que realizou a ação"
-        timestamp:
+        email:
           type: string
-          format: date-time
-          description: "Quando a ação ocorreu"
-        ipAddress:
+        birthDate:
           type: string
-          description: "Endereço IP do usuário"
+          format: date
+        address:
+          type: string
+        status:
+          type: string
+          enum: [ACTIVE, INACTIVE, SUSPENDED]
         createdAt:
           type: string
           format: date-time
+        updatedAt:
+          type: string
+          format: date-time
 
-    AuditLogPage:
+    DriverRequest:
+      type: object
+      required:
+        - name
+        - cpf
+        - cnhNumber
+        - cnhCategory
+        - cnhExpiryDate
+      properties:
+        name:
+          type: string
+        cpf:
+          type: string
+        cnhNumber:
+          type: string
+        cnhCategory:
+          type: string
+          enum: [A, B, C, D, E, AB, AC, AD, AE]
+        cnhExpiryDate:
+          type: string
+          format: date
+        phone:
+          type: string
+        email:
+          type: string
+        birthDate:
+          type: string
+          format: date
+        address:
+          type: string
+
+    DriverPage:
       type: object
       properties:
         content:
           type: array
           items:
-            $ref: '#/components/schemas/AuditLog'
+            $ref: '#/components/schemas/Driver'
         totalElements:
           type: integer
         totalPages:
@@ -1273,152 +844,3 @@ components:
           type: string
         detail:
           type: string
-
-    Fine:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-        vehicleId:
-          type: string
-          format: uuid
-        driverCpf:
-          type: string
-          description: "CPF do motorista (XXX.XXX.XXX-XX)"
-          example: "123.456.789-00"
-        description:
-          type: string
-        amount:
-          type: number
-          format: double
-        infractionDate:
-          type: string
-          format: date
-        points:
-          type: integer
-        status:
-          type: string
-          enum: [PENDING, PAID, DISPUTED]
-        costCenterId:
-          type: string
-        createdAt:
-          type: string
-          format: date-time
-
-    FineRequest:
-      type: object
-      required:
-        - vehicleId
-        - driverCpf
-        - description
-        - amount
-        - infractionDate
-        - status
-      properties:
-        vehicleId:
-          type: string
-          format: uuid
-        driverCpf:
-          type: string
-          description: "CPF do motorista (XXX.XXX.XXX-XX)"
-          example: "123.456.789-00"
-        description:
-          type: string
-        amount:
-          type: number
-          format: double
-        infractionDate:
-          type: string
-          format: date
-        points:
-          type: integer
-        status:
-          type: string
-          enum: [PENDING, PAID, DISPUTED]
-        costCenterId:
-          type: string
-
-    FinePage:
-      type: object
-      properties:
-        content:
-          type: array
-          items:
-            $ref: '#/components/schemas/Fine'
-        totalElements:
-          type: integer
-        totalPages:
-          type: integer
-        size:
-          type: integer
-        number:
-          type: integer
-
-    ServiceOrder:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-        vehicleId:
-          type: string
-          format: uuid
-        description:
-          type: string
-        status:
-          type: string
-          enum: [PENDING, APPROVED, REJECTED, COMPLETED]
-        approvedBy:
-          type: string
-        approvedAt:
-          type: string
-          format: date-time
-        warrantyExpiryDate:
-          type: string
-          format: date-time
-        createdAt:
-          type: string
-          format: date-time
-        updatedAt:
-          type: string
-          format: date-time
-
-    ServiceOrderRequest:
-      type: object
-      required:
-        - vehicleId
-        - description
-      properties:
-        vehicleId:
-          type: string
-          format: uuid
-        description:
-          type: string
-        warrantyExpiryDate:
-          type: string
-          format: date-time
-
-    ServiceOrderApproval:
-      type: object
-      required:
-        - approvedBy
-      properties:
-        approvedBy:
-          type: string
-
-    ServiceOrderPage:
-      type: object
-      properties:
-        content:
-          type: array
-          items:
-            $ref: '#/components/schemas/ServiceOrder'
-        totalElements:
-          type: integer
-        totalPages:
-          type: integer
-        size:
-          type: integer
-        number:
-          type: integer
