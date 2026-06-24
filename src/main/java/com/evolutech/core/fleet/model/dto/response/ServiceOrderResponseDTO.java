@@ -6,32 +6,23 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class MaintenanceResponseDTO {
+public class ServiceOrderResponseDTO {
 
     private String id;
-    @JsonFormat(pattern = "yyyy-MM-dd")
-    private LocalDate maintenanceDate;
-    private String description;
-    private String type;
-    private Double cost;
-    private Double mileage;
-    private Double nextMileage;
-    private String status;
     private String vehicleId;
-    private String serviceOrderId;
-    private String costCenterId;
-    private String projectId;
-    private String invoiceFuelType;
-    private Double litersFilled;
-    private Double distanceTraveled;
-    private Boolean anomalousConsumption;
+    private String description;
+    private String status;
+    private String approvedBy;
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    private LocalDateTime approvedAt;
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    private LocalDateTime warrantyExpiryDate;
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime createdAt;
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")

@@ -17,28 +17,27 @@ import java.time.LocalDate;
 public class MaintenanceRequestDTO {
 
     private String id;
-
     @NotNull(message = "Maintenance date is required")
     private LocalDate maintenanceDate;
-
     @NotBlank(message = "Description is required")
     private String description;
-
     @NotBlank(message = "Type is required")
     private String type;
-
     @NotNull(message = "Cost is required")
     @Positive(message = "Cost must be greater than zero")
     private Double cost;
-
     @NotNull(message = "Current mileage is required")
     @Positive(message = "Mileage must be greater than zero")
     private Double mileage;
-
     @NotNull(message = "Next mileage is required")
     @Positive(message = "Next mileage must be greater than zero")
     private Double nextMileage;
-
     @NotNull(message = "Vehicle ID is required")
     private String vehicleId;
+    private String serviceOrderId;
+    private String costCenterId;
+    private String projectId;
+    private String invoiceFuelType;
+    private Double litersFilled;
+    private Double distanceTraveled;
 }
