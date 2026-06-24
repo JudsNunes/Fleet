@@ -20,6 +20,8 @@ tags:
     description: Operações com manutenções
   - name: Driver
     description: Gestão de motoristas
+  - name: AuditLog
+    description: Consulta de logs de auditoria
 
 paths:
   /vehicles:
@@ -556,6 +558,128 @@ paths:
                 items:
                   $ref: '#/components/schemas/Driver'
 
+  /audit-logs:
+    get:
+      tags:
+        - AuditLog
+      summary: Listar todos os logs de auditoria
+      operationId: getAllAuditLogs
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: Lista de logs de auditoria
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuditLogPage'
+
+  /audit-logs/entity/{entityType}:
+    get:
+      tags:
+        - AuditLog
+      summary: Listar logs de auditoria por tipo de entidade
+      operationId: getAuditLogsByEntityType
+      parameters:
+        - name: entityType
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: Lista de logs de auditoria
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuditLogPage'
+
+  /audit-logs/entity/{entityType}/{entityId}:
+    get:
+      tags:
+        - AuditLog
+      summary: Listar logs de auditoria de uma entidade específica
+      operationId: getAuditLogsByEntity
+      parameters:
+        - name: entityType
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: entityId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: Lista de logs de auditoria
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuditLogPage'
+
+  /audit-logs/user/{userId}:
+    get:
+      tags:
+        - AuditLog
+      summary: Listar logs de auditoria por usuário
+      operationId: getAuditLogsByUser
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: Lista de logs de auditoria
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuditLogPage'
+
 components:
   schemas:
     Vehicle:
@@ -894,6 +1018,53 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Driver'
+        totalElements:
+          type: integer
+        totalPages:
+          type: integer
+        size:
+          type: integer
+        number:
+          type: integer
+
+    AuditLog:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        entityType:
+          type: string
+        entityId:
+          type: string
+          format: uuid
+        action:
+          type: string
+          enum: [CREATE, UPDATE, DELETE, STATUS_CHANGE]
+        fieldName:
+          type: string
+        oldValue:
+          type: string
+        newValue:
+          type: string
+        userId:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        ipAddress:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+
+    AuditLogPage:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/AuditLog'
         totalElements:
           type: integer
         totalPages:
