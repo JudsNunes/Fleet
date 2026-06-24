@@ -15,8 +15,12 @@ public interface TripMapper {
 
     @Mapping(target = "vehicle", source = "vehicleEntity")
     @Mapping(target = "driver", source = "driverEntity")
+    @Mapping(target = "id", ignore = true)
     @Mapping(target = "status", ignore = true)
     @Mapping(target = "routeDeviation", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
+    @Mapping(target = "deletedAt", ignore = true)
     TripEntity toEntity(TripRequestDTO request, VehicleEntity vehicleEntity, DriverEntity driverEntity);
 
     @Mapping(target = "vehicleId", expression = "java(entity.getVehicle() != null ? entity.getVehicle().getId() : null)")

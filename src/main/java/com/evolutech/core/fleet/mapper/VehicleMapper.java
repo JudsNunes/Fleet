@@ -15,7 +15,7 @@ import java.util.List;
 public interface VehicleMapper {
 
     @Mapping(target = "status", ignore = true)
-    @Mapping(target = "fuelType", expression = "java(request.getFuelType() != null ? FuelType.valueOf(request.getFuelType()) : null)")
+    @Mapping(target = "fuelType", expression = "java(request.getFuelType() != null ? com.evolutech.core.fleet.model.utils.enums.FuelType.valueOf(request.getFuelType()) : null)")
     VehicleEntity toEntity(VehicleRequestDTO request);
 
     @Mapping(target = "status", expression = "java(vehicleEntity.getStatus() != null ? vehicleEntity.getStatus().name() : null)")
