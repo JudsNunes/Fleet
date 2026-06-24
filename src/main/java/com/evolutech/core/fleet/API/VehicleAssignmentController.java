@@ -1,103 +1,103 @@
 package com.evolutech.core.fleet.API;
 
-import com.evolutech.core.fleet.model.dto.request.VehicleAssignmentRequestDTO;
-import com.evolutech.core.fleet.model.dto.response.VehicleAssignmentResponseDTO;
-import com.evolutech.core.fleet.model.utils.enums.AssignmentStatus;
+import com.evolutech.core.fleet.mapper.ApiMapper;
 import com.evolutech.core.fleet.service.VehicleAssignmentService;
-import jakarta.validation.Valid;
+import com.evolutech.fleet.api.AssignmentsApi;
+import com.evolutech.fleet.api.model.VehicleAssignmentDTO;
+import com.evolutech.fleet.api.model.VehicleAssignmentPageDTO;
+import com.evolutech.fleet.api.model.VehicleAssignmentRequestDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PageableDefault;
-import org.springframework.http.HttpStatus;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/assignments")
 @RequiredArgsConstructor
 @Slf4j
-public class VehicleAssignmentController {
+public class VehicleAssignmentController implements AssignmentsApi {
 
     private final VehicleAssignmentService vehicleAssignmentService;
+    private final ApiMapper apiMapper;
 
-    @GetMapping("/{id}")
-    public ResponseEntity<VehicleAssignmentResponseDTO> getAssignmentById(@PathVariable String id) {
-        log.info("Fetching assignment: {}", id);
-        return vehicleAssignmentService.findById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    @Override
+    public ResponseEntity<VehicleAssignmentDTO> createAssignment(VehicleAssignmentRequestDTO vehicleAssignmentRequestDTO) {
+        log.info("Creating assignment for vehicle: {} and driver: {}", vehicleAssignmentRequestDTO.getVehicleId(), vehicleAssignmentRequestDTO.getDriverId());
+        var internalRequest = apiMapper.toAssignmentRequestInternal(vehicleAssignmentRequestDTO);
+        var result = vehicleAssignmentService.save(internalRequest);
+        return ResponseEntity.status(201).body(apiMapper.toAssignmentApi(result));
     }
 
-    @PostMapping
-    public ResponseEntity<VehicleAssignmentResponseDTO> createAssignment(@Valid @RequestBody VehicleAssignmentRequestDTO body) {
-        log.info("Creating assignment for vehicle: {} and driver: {}", body.getVehicleId(), body.getDriverId());
-        var result = vehicleAssignmentService.save(body);
-        return ResponseEntity.status(HttpStatus.CREATED).body(result);
-    }
-
-    @PutMapping("/{id}")
-    public ResponseEntity<VehicleAssignmentResponseDTO> updateAssignment(@PathVariable String id, @Valid @RequestBody VehicleAssignmentRequestDTO body) {
-        log.info("Updating assignment: {}", id);
-        var result = vehicleAssignmentService.update(id, body);
-        return ResponseEntity.ok(result);
-    }
-
-    @PatchMapping("/{id}/end")
-    public ResponseEntity<VehicleAssignmentResponseDTO> endAssignment(@PathVariable String id) {
-        log.info("Ending assignment: {}", id);
-        var result = vehicleAssignmentService.end(id);
-        return ResponseEntity.ok(result);
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteAssignment(@PathVariable String id) {
+    @Override
+    public ResponseEntity<Void> deleteAssignment(UUID id) {
         log.info("Deleting assignment: {}", id);
-        vehicleAssignmentService.delete(id);
+        vehicleAssignmentService.delete(id.toString());
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping
-    public ResponseEntity<Page<VehicleAssignmentResponseDTO>> getAllAssignments(
-            @RequestParam(required = false) String vehicleId,
-            @RequestParam(required = false) String driverId,
-            @RequestParam(required = false) AssignmentStatus status,
-            @PageableDefault(size = 20, page = 0) Pageable pageable) {
-        log.info("Fetching assignments - vehicle: {}, driver: {}, status: {}", vehicleId, driverId, status);
+    @Override
+    public ResponseEntity<VehicleAssignmentDTO> endAssignment(UUID id) {
+        log.info("Ending assignment: {}", id);
+        var result = vehicleAssignmentService.end(id.toString());
+        return ResponseEntity.ok(apiMapper.toAssignmentApi(result));
+    }
+
+    @Override
+    public ResponseEntity<List<VehicleAssignmentDTO>> getActiveAssignments() {
+        log.info("Fetching active assignments");
+        var result = vehicleAssignmentService.findActiveAssignments();
+        return ResponseEntity.ok(result.stream().map(apiMapper::toAssignmentApi).collect(Collectors.toList()));
+    }
+
+    @Override
+    public ResponseEntity<VehicleAssignmentPageDTO> getAllAssignments(UUID vehicleId, UUID driverId, String status, Integer page, Integer size) {
+        log.info("Fetching assignments - page: {}, size: {}", page, size);
+        var pageable = PageRequest.of(page, size);
         if (vehicleId != null) {
-            return ResponseEntity.ok(vehicleAssignmentService.findByVehicleId(vehicleId, pageable));
+            return ResponseEntity.ok(apiMapper.toAssignmentPageApi(vehicleAssignmentService.findByVehicleId(vehicleId.toString(), pageable)));
         }
         if (driverId != null) {
-            return ResponseEntity.ok(vehicleAssignmentService.findByDriverId(driverId, pageable));
+            return ResponseEntity.ok(apiMapper.toAssignmentPageApi(vehicleAssignmentService.findByDriverId(driverId.toString(), pageable)));
         }
         if (status != null) {
-            return ResponseEntity.ok(vehicleAssignmentService.findByStatus(status, pageable));
+            return ResponseEntity.ok(apiMapper.toAssignmentPageApi(vehicleAssignmentService.findByStatus(com.evolutech.core.fleet.model.utils.enums.AssignmentStatus.valueOf(status), pageable)));
         }
-        return ResponseEntity.ok(vehicleAssignmentService.findAllPaged(pageable));
+        return ResponseEntity.ok(apiMapper.toAssignmentPageApi(vehicleAssignmentService.findAllPaged(pageable)));
     }
 
-    @GetMapping("/vehicle/{vehicleId}")
-    public ResponseEntity<Page<VehicleAssignmentResponseDTO>> getAssignmentsByVehicle(
-            @PathVariable String vehicleId,
-            @PageableDefault(size = 20, page = 0) Pageable pageable) {
-        log.info("Fetching assignments by vehicle: {}", vehicleId);
-        return ResponseEntity.ok(vehicleAssignmentService.findByVehicleId(vehicleId, pageable));
+    @Override
+    public ResponseEntity<VehicleAssignmentDTO> getAssignmentById(UUID id) {
+        log.info("Fetching assignment: {}", id);
+        return vehicleAssignmentService.findById(id.toString())
+                .map(a -> ResponseEntity.ok(apiMapper.toAssignmentApi(a)))
+                .orElse(ResponseEntity.notFound().build());
     }
 
-    @GetMapping("/driver/{driverId}")
-    public ResponseEntity<Page<VehicleAssignmentResponseDTO>> getAssignmentsByDriver(
-            @PathVariable String driverId,
-            @PageableDefault(size = 20, page = 0) Pageable pageable) {
+    @Override
+    public ResponseEntity<VehicleAssignmentPageDTO> getAssignmentsByDriver(UUID driverId, Integer page, Integer size) {
         log.info("Fetching assignments by driver: {}", driverId);
-        return ResponseEntity.ok(vehicleAssignmentService.findByDriverId(driverId, pageable));
+        var pageable = PageRequest.of(page, size);
+        var result = vehicleAssignmentService.findByDriverId(driverId.toString(), pageable);
+        return ResponseEntity.ok(apiMapper.toAssignmentPageApi(result));
     }
 
-    @GetMapping("/active")
-    public ResponseEntity<List<VehicleAssignmentResponseDTO>> getActiveAssignments() {
-        log.info("Fetching active assignments");
-        return ResponseEntity.ok(vehicleAssignmentService.findActiveAssignments());
+    @Override
+    public ResponseEntity<VehicleAssignmentPageDTO> getAssignmentsByVehicle(UUID vehicleId, Integer page, Integer size) {
+        log.info("Fetching assignments by vehicle: {}", vehicleId);
+        var pageable = PageRequest.of(page, size);
+        var result = vehicleAssignmentService.findByVehicleId(vehicleId.toString(), pageable);
+        return ResponseEntity.ok(apiMapper.toAssignmentPageApi(result));
+    }
+
+    @Override
+    public ResponseEntity<VehicleAssignmentDTO> updateAssignment(UUID id, VehicleAssignmentRequestDTO vehicleAssignmentRequestDTO) {
+        log.info("Updating assignment: {}", id);
+        var internalRequest = apiMapper.toAssignmentRequestInternal(vehicleAssignmentRequestDTO);
+        var result = vehicleAssignmentService.update(id.toString(), internalRequest);
+        return ResponseEntity.ok(apiMapper.toAssignmentApi(result));
     }
 }

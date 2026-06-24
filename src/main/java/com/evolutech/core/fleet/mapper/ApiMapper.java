@@ -294,4 +294,40 @@ public class ApiMapper {
         dto.setNumber(page.getNumber());
         return dto;
     }
+
+    public com.evolutech.core.fleet.model.dto.request.VehicleAssignmentRequestDTO toAssignmentRequestInternal(com.evolutech.fleet.api.model.VehicleAssignmentRequestDTO api) {
+        return com.evolutech.core.fleet.model.dto.request.VehicleAssignmentRequestDTO.builder()
+                .vehicleId(api.getVehicleId() != null ? api.getVehicleId().toString() : null)
+                .driverId(api.getDriverId() != null ? api.getDriverId().toString() : null)
+                .startDate(api.getStartDate())
+                .endDate(api.getEndDate())
+                .assignedBy(api.getAssignedBy())
+                .notes(api.getNotes())
+                .build();
+    }
+
+    public com.evolutech.fleet.api.model.VehicleAssignmentDTO toAssignmentApi(com.evolutech.core.fleet.model.dto.response.VehicleAssignmentResponseDTO internal) {
+        var dto = new com.evolutech.fleet.api.model.VehicleAssignmentDTO();
+        dto.setId(internal.getId() != null ? java.util.UUID.fromString(internal.getId()) : null);
+        dto.setVehicleId(internal.getVehicleId() != null ? java.util.UUID.fromString(internal.getVehicleId()) : null);
+        dto.setDriverId(internal.getDriverId() != null ? java.util.UUID.fromString(internal.getDriverId()) : null);
+        dto.setStartDate(internal.getStartDate());
+        dto.setEndDate(internal.getEndDate());
+        dto.setStatus(internal.getStatus() != null ? com.evolutech.fleet.api.model.VehicleAssignmentDTO.StatusEnum.fromValue(internal.getStatus()) : null);
+        dto.setAssignedBy(internal.getAssignedBy());
+        dto.setNotes(internal.getNotes());
+        dto.setCreatedAt(internal.getCreatedAt());
+        dto.setUpdatedAt(internal.getUpdatedAt());
+        return dto;
+    }
+
+    public com.evolutech.fleet.api.model.VehicleAssignmentPageDTO toAssignmentPageApi(org.springframework.data.domain.Page<com.evolutech.core.fleet.model.dto.response.VehicleAssignmentResponseDTO> page) {
+        var dto = new com.evolutech.fleet.api.model.VehicleAssignmentPageDTO();
+        dto.setContent(page.getContent().stream().map(this::toAssignmentApi).collect(Collectors.toList()));
+        dto.setTotalElements((int) page.getTotalElements());
+        dto.setTotalPages(page.getTotalPages());
+        dto.setSize(page.getSize());
+        dto.setNumber(page.getNumber());
+        return dto;
+    }
 }
